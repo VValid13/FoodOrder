@@ -32,6 +32,11 @@ services:
       - '9001:9001'
     volumes:
       - rustfs-data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://localhost:9000/health']
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres-data:
