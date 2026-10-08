@@ -1,7 +1,14 @@
 export const ENV_KEYS = {
   PORT: 'PORT',
+  FRONT_ORIGIN: 'FRONT_ORIGIN',
   DATABASE_URL: 'DATABASE_URL',
   DATABASE_URL_TEST: 'DATABASE_URL_TEST',
+  JWT_SECRET: 'JWT_SECRET',
+  JWT_REFRESH_SECRET: 'JWT_REFRESH_SECRET',
+  S3_ENDPOINT: 'S3_ENDPOINT',
+  S3_REGION: 'S3_REGION',
+  S3_ACCESS_KEY: 'S3_ACCESS_KEY',
+  S3_SECRET_KEY: 'S3_SECRET_KEY',
   S3_BUCKET: 'S3_BUCKET',
   S3_BUCKET_TEST: 'S3_BUCKET_TEST',
 } as const;
@@ -9,3 +16,5 @@ export const ENV_KEYS = {
 export type EnvKey = (typeof ENV_KEYS)[keyof typeof ENV_KEYS];
 
 export const ENV_FILE_PATH = '.env';
+export const MIN_PORT = 1;
+export const MAX_PORT = 65_535;

@@ -78,6 +78,7 @@ Les tests e2e appliquent automatiquement les migrations sur la base de test (`gl
 ├── docker-compose.yml         PostgreSQL et RustFS
 ├── src/
 │   ├── _utils/
+│   │   ├── config/            Validation de l'environnement, options du ValidationPipe et de Swagger
 │   │   ├── constants/         Constantes (pas de valeur magique dans le code)
 │   │   ├── decorators/        Décorateurs partagés
 │   │   ├── dtos/              DTO partagés (réponses d'erreur)
@@ -100,7 +101,7 @@ Les tests e2e appliquent automatiquement les migrations sur la base de test (`gl
 
 - `type` plutôt qu'`interface`.
 - Pas de valeur magique : les nombres et chaînes de configuration vont dans `src/_utils/constants`.
-- Variables d'environnement lues avec `ConfigService.getOrThrow` (ou `getRequiredEnv` hors de Nest).
+- Variables d'environnement validées au démarrage par `EnvironmentVariables` (`src/_utils/config/env.config.ts`) : l'application refuse de démarrer si une variable manque ou est invalide. Elles se lisent avec `ConfigService.getOrThrow` (ou `getRequiredEnv` hors de Nest).
 - Réponses de l'API via des DTO et des mappers.
 - Imports relatifs avec l'extension `.js` (ESM).
 - Pas de commentaires dans le code.
