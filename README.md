@@ -1,114 +1,123 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# FoodOrder
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API NestJS de commande groupée de restaurant.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Stack : NestJS 12, TypeScript 6 (ESM), Kysely + PostgreSQL 18, RustFS (stockage compatible S3), Vitest, oxlint et oxfmt.
 
-## Description
+## Prérequis
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js 24 (voir `.nvmrc`, minimum `22.12`)
+- pnpm via Corepack (la version est fixée par le champ `packageManager` de `package.json`)
+- Docker et Docker Compose
 
-## Project setup
+## Démarrage en local
 
 ```bash
-$ pnpm install
+corepack enable
+pnpm install
+cp .env.example .env
+pnpm infra:up
+pnpm migrate:latest
+pnpm start:dev
 ```
 
-## Compile and run the project
+Pensez à remplacer les secrets de `.env` (`JWT_SECRET`, `JWT_REFRESH_SECRET`, mots de passe) par vos propres valeurs.
 
-```bash
-# development
-$ pnpm run start
+L'API écoute sur `http://localhost:3000` (variable `PORT`) :
 
-# watch mode
-$ pnpm run start:dev
+- `GET /health` : état de l'API et de la base de données
+- `/api` : documentation Swagger
+- `/api-json` : document OpenAPI
 
-# production mode
-$ pnpm run start:prod
+La console RustFS est accessible sur `http://localhost:9001` (identifiants `S3_ACCESS_KEY` et `S3_SECRET_KEY`).
+
+Au premier démarrage, PostgreSQL crée la base `<POSTGRES_DB>` et la base de test `<POSTGRES_DB>_test` (script `docker/postgres/init/`). Ce script ne s'exécute que si le volume est vide : pour le rejouer, lancez `docker compose down -v` (attention, cela supprime les données).
+
+## Commandes
+
+| Commande                     | Description                                              |
+| ---------------------------- | -------------------------------------------------------- |
+| `pnpm start:dev`             | Démarre l'API en mode watch                              |
+| `pnpm build`                 | Compile dans `dist/`                                     |
+| `pnpm start:prod`            | Lance la version compilée                                |
+| `pnpm test`                  | Tests unitaires (`src/**/*.spec.ts`)                     |
+| `pnpm test:watch`            | Tests unitaires en mode watch                            |
+| `pnpm test:cov`              | Tests unitaires avec couverture                          |
+| `pnpm test:e2e`              | Tests e2e (`test/**/*.e2e-spec.ts`) sur la base de test  |
+| `pnpm lint`                  | oxlint sur `src` et `test`, les warnings font échouer    |
+| `pnpm format`                | Formate le code avec oxfmt                               |
+| `pnpm format:check`          | Vérifie le formatage                                     |
+| `pnpm typecheck`             | Vérifie les types avec `tsc --noEmit`                    |
+| `pnpm infra:up`              | Démarre PostgreSQL et RustFS                             |
+| `pnpm infra:down`            | Arrête PostgreSQL et RustFS                              |
+| `pnpm migrate:make <nom>`    | Crée une migration vide horodatée (nom en snake_case)    |
+| `pnpm migrate:latest [test]` | Applique toutes les migrations en attente                |
+| `pnpm migrate:up [test]`     | Applique la migration suivante                           |
+| `pnpm migrate:down [test]`   | Annule la dernière migration                             |
+| `pnpm db:types`              | Régénère `src/database/database.types.ts` depuis la base |
+
+L'argument optionnel `test` des commandes `migrate:*` cible `DATABASE_URL_TEST` au lieu de `DATABASE_URL`.
+
+## Workflow des migrations
+
+1. Créer la migration : `pnpm migrate:make create_users_table`. Un fichier `src/database/migrations/<horodatage>_create_users_table.ts` est créé avec des fonctions `up` et `down` vides.
+2. Écrire `up` et `down` (renommer le paramètre `_db` en `db`). Utiliser `Kysely<unknown>` : une migration ne dépend pas des types générés.
+3. Appliquer : `pnpm migrate:latest`.
+4. Régénérer les types : `pnpm db:types`, puis committer la migration et `database.types.ts` ensemble.
+5. Pour annuler : `pnpm migrate:down`.
+
+Les tests e2e appliquent automatiquement les migrations sur la base de test (`globalSetup`).
+
+`database.types.ts` est généré par `kysely-codegen` : il ne doit pas être modifié à la main. Il est exclu du lint et du formatage car il contient des `interface`.
+
+## Structure des dossiers
+
+```
+.
+├── docker/postgres/init/      Scripts exécutés au premier démarrage de PostgreSQL
+├── docker-compose.yml         PostgreSQL et RustFS
+├── src/
+│   ├── _utils/
+│   │   ├── constants/         Constantes (pas de valeur magique dans le code)
+│   │   ├── decorators/        Décorateurs partagés
+│   │   ├── dtos/              DTO partagés (réponses d'erreur)
+│   │   └── helpers/           Fonctions utilitaires (export function)
+│   ├── database/
+│   │   ├── migrations/        Migrations Kysely
+│   │   ├── scripts/           Scripts de migration (lancés avec tsx)
+│   │   ├── database.module.ts Module global qui fournit l'instance Kysely
+│   │   └── database.types.ts  Types générés par kysely-codegen
+│   ├── health/                Module Health (GET /health)
+│   ├── app.module.ts
+│   ├── app.setup.ts           Configuration commune à main.ts et aux tests e2e
+│   └── main.ts
+└── test/
+    ├── setup/                 globalSetup et setupFiles des tests e2e
+    └── *.e2e-spec.ts
 ```
 
-## Run tests
+## Conventions
 
-```bash
-# unit tests
-$ pnpm run test
+- `type` plutôt qu'`interface`.
+- Pas de valeur magique : les nombres et chaînes de configuration vont dans `src/_utils/constants`.
+- Variables d'environnement lues avec `ConfigService.getOrThrow` (ou `getRequiredEnv` hors de Nest).
+- Réponses de l'API via des DTO et des mappers.
+- Imports relatifs avec l'extension `.js` (ESM).
+- Pas de commentaires dans le code.
 
-# e2e tests
-$ pnpm run test:e2e
+### `import type` et l'injection de dépendances
 
-# test coverage
-$ pnpm run test:cov
+Utilisez `import type` quand un import ne sert que de type, **sauf pour une classe injectée dans un constructeur**.
+
+Nest lit le type des paramètres du constructeur à l'exécution (`emitDecoratorMetadata`) pour savoir quoi injecter. Un `import type` est effacé à la compilation : la métadonnée devient `Object` et l'injection échoue.
+
+```ts
+import { HealthService } from './health.service.js';
+
+@Controller('health')
+export class HealthController {
+  constructor(private readonly healthService: HealthService) {}
+}
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Avec `import type { HealthService }`, la compilation passe mais Nest ne peut plus résoudre la dépendance à l'exécution (erreur « Nest can't resolve dependencies »). C'est pour cette raison que la règle `typescript/consistent-type-imports` est désactivée dans `.oxlintrc.json`.
