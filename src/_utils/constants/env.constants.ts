@@ -5,3 +5,5 @@ export const ENV_KEYS = {
 } as const;
 
 export type EnvKey = (typeof ENV_KEYS)[keyof typeof ENV_KEYS];
+
+export const ENV_FILE_PATH = '.env';
