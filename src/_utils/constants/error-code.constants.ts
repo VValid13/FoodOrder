@@ -1,0 +1,3 @@
+export enum ErrorCode {
+  DATABASE_UNAVAILABLE = 'DATABASE_UNAVAILABLE',
+}
