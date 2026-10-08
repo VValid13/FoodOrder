@@ -21,7 +21,12 @@
     "format:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
     "infra:up": "docker compose up -d",
-    "infra:down": "docker compose down"
+    "infra:down": "docker compose down",
+    "migrate:latest": "tsx --env-file=.env src/database/scripts/migrate.ts latest",
+    "migrate:up": "tsx --env-file=.env src/database/scripts/migrate.ts up",
+    "migrate:down": "tsx --env-file=.env src/database/scripts/migrate.ts down",
+    "migrate:make": "tsx src/database/scripts/make-migration.ts",
+    "db:types": "kysely-codegen --camel-case --env-file .env --out-file src/database/database.types.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1147.0",
