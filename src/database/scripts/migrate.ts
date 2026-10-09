@@ -23,8 +23,8 @@ async function main(): Promise<void> {
     throw new Error(`Unknown migration action. Expected one of: ${MIGRATION_ACTIONS.join(', ')}`);
   }
 
-  const envKey =
-    target === MIGRATION_TEST_TARGET ? ENV_KEYS.DATABASE_URL_TEST : ENV_KEYS.DATABASE_URL;
+  const envKey = ENV_KEYS.DATABASE_URL;
+  //  target === MIGRATION_TEST_TARGET ? ENV_KEYS.DATABASE_URL_TEST :ENV_KEYS.DATABASE_URL;
   const db = createDatabase(getRequiredEnv(envKey));
 
   try {

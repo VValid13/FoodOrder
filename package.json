@@ -14,10 +14,6 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main.js",
     "lint": "oxlint --deny-warnings src test",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:cov": "vitest run --coverage",
-    "test:e2e": "vitest run --config vitest.config.e2e.ts",
     "format:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
     "infra:up": "docker compose up -d",
@@ -45,7 +41,6 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "file-type": "^22.1.1",
-    "helmet": "^8.3.0",
     "kysely": "^0.29.6",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -56,7 +51,6 @@
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
     "@nestjs/schematics": "^12.0.0",
-    "@nestjs/testing": "^12.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
     "@types/multer": "^2.3.0",
@@ -64,18 +58,15 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.0.0",
-    "@vitest/coverage-v8": "^4.1.11",
     "kysely-codegen": "^0.20.0",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "source-map-support": "^0.5.21",
-    "supertest": "^7.0.0",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.11"
+    "typescript": "^6.0.2"
   },
   "engines": {
     "node": ">=22.12"
