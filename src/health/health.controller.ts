@@ -8,18 +8,33 @@ import {
 } from '../_utils/constants/health.constants.js';
 import { ErrorResponseDto } from '../_utils/dtos/error-response.dto.js';
 import { buildErrorResponse } from '../_utils/helpers/build-error-response.helper.js';
-import { HealthResponseDto } from './dto/health-response.dto.js';
-import { toHealthResponseDto } from './health.mapper.js';
-import { HealthService } from './health.service.js';
+import {HealthCheck, HealthCheckService, HttpHealthIndicator, TypeOrmHealthIndicator} from "@nestjs/terminus";
+import {ENV_KEYS} from "../_utils/constants/env.constants.js";
+import {DbHealthIndicator} from "./db.health.js";
 
 @ApiTags(HEALTH_TAG)
 @Controller(HEALTH_ROUTE)
 export class HealthController {
-  constructor(private readonly healthService: HealthService) {}
+  constructor(
+      private readonly health: HealthCheckService,
+      private readonly db: DbHealthIndicator,
+      //private readonly http: HttpHealthIndicator
+
+      //private readonly healthService: HealthService
+  ) {}
 
   @Get()
-  @ApiOkResponse({ type: HealthResponseDto })
+  @HealthCheck()
+  check(){
+    return this.health.check([
+      () => this.db.isHealthy('database').withTimeout(1000),
+      //() => this.http.pingCheck('http connection check','validUrl'),
+    ])
+  }
+  /*
   @ApiServiceUnavailableResponse({ type: ErrorResponseDto })
+  @ApiOkResponse({ type: HealthResponseDto })
+
   async check(): Promise<HealthResponseDto> {
     if (!(await this.healthService.isDatabaseUp())) {
       throw new ServiceUnavailableException(
@@ -33,4 +48,5 @@ export class HealthController {
 
     return toHealthResponseDto();
   }
+   */
 }
