@@ -1,5 +1,5 @@
 import {Injectable} from "@nestjs/common";
-import {HealthIndicatorService} from "@nestjs/terminus";
+import {HealthIndicatorResult, HealthIndicatorService} from "@nestjs/terminus";
 import {InjectKysely} from "../_utils/decorators/inject-kysely.decorator.js";
 import {Kysely} from "kysely";
 import type {DB} from "../database/database.types.js";
@@ -11,7 +11,7 @@ export class DbHealthIndicator{
         private readonly healthIndicatorService: HealthIndicatorService,
     ) {}
 
-    async isHealthy(key: string) {
+    async isHealthy(key: string): Promise<HealthIndicatorResult> {
 
         const indicator = this.healthIndicatorService.check(key);
         try{
