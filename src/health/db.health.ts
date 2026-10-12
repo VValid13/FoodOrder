@@ -1,9 +1,9 @@
 import {Injectable} from "@nestjs/common";
 import {HealthIndicatorService} from "@nestjs/terminus";
 import {InjectKysely} from "../_utils/decorators/inject-kysely.decorator.js";
-import {Kysely, sql} from "kysely";
+import {Kysely} from "kysely";
 import type {DB} from "../database/database.types.js";
-
+import {DATABASE_UNAVAILABLE_MESSAGE} from '../_utils/constants/health.constants.js';
 @Injectable()
 export class DbHealthIndicator{
     constructor(
@@ -14,36 +14,13 @@ export class DbHealthIndicator{
     async isHealthy(key: string) {
 
         const indicator = this.healthIndicatorService.check(key);
-        try {
-            //await this.db.selectAll().execute()
-            await sql`select 1`.execute(this.db);
+        try{
+            await this.db.selectNoFrom(
+                (eb) => eb.val(1).as('health')
+            ).executeTakeFirst();
             return indicator.up();
-        } catch {
-            return indicator.down({postgres: 'not reachable'});
+        }catch (err){
+            return indicator.down({postgres: `${DATABASE_UNAVAILABLE_MESSAGE} ${err}`});
         }
-
-        //return this.healthIndicatorService
-        //    .check(key)
-        //    .attempt( async ({signal}) => {
-                /*
-                const response = await fetch('localhost:5432', {signal});
-                const {message: breeds} = await response.json();
-
-                return {breeds: breeds.length };
-                 */
-                // test Querry db
-                //const result = await this.db.selectFrom('user').selectAll().execute();
-                //console.log(result);
-
-                /*
-                try {
-                    //await this.db.selectAll().execute()
-                    await sql`select 1`.execute(this.db);
-                    return ;
-                } catch {
-                    return {message: 'testMsg'};
-                }
-                 */
-
-            }
+    }
 }

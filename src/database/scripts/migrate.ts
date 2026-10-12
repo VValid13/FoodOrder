@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common';
 import {
   MIGRATION_ACTIONS,
-  MIGRATION_TEST_TARGET,
   MIGRATIONS_LOGGER_CONTEXT,
 } from '../../_utils/constants/database.constants.js';
 import type { MigrationAction } from '../../_utils/constants/database.constants.js';
@@ -24,7 +23,6 @@ async function main(): Promise<void> {
   }
 
   const envKey = ENV_KEYS.DATABASE_URL;
-  //  target === MIGRATION_TEST_TARGET ? ENV_KEYS.DATABASE_URL_TEST :ENV_KEYS.DATABASE_URL;
   const db = createDatabase(getRequiredEnv(envKey));
 
   try {

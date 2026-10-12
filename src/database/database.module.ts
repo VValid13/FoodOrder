@@ -22,7 +22,6 @@ import type { DB } from './database.types.js';
   exports: [KYSELY_TOKEN],
 })
 export class DatabaseModule implements OnApplicationShutdown {
-  //constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
   constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
   async onApplicationShutdown(): Promise<void> {
     await this.db.destroy();
