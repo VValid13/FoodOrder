@@ -1,4 +1,5 @@
 import { EnvironmentVariables } from '../config/env.config.js';
+import {ValueOf} from "../utils.types.js";
 
 export const ENV_KEYS = {
   PORT: 'PORT',
@@ -13,8 +14,6 @@ export const ENV_KEYS = {
 } as const satisfies Record<string, keyof EnvironmentVariables>;
 
 export type EnvType = ValueOf<typeof ENV_KEYS>;
-export type ValueOf<T> = T[keyof T];
-//export type EnvKey = (typeof ENV_KEYS)[keyof typeof ENV_KEYS];
 
 export const ENV_FILE_PATH = '.env';
 export const MIN_PORT = 1;

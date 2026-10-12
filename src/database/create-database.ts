@@ -9,7 +9,10 @@ import type { DatabaseTables } from './database.types.js';
 
 const logger = new Logger(DATABASE_LOGGER_CONTEXT);
 
-export function createDatabase(connectionString: string): Kysely<DatabaseTables> {
+export function createDatabase(connectionString: string | undefined): Kysely<DatabaseTables> {
+  if (connectionString === undefined || connectionString.trim() === '') {
+    throw new Error(`Missing required environment variable: ${connectionString}`);
+  }
   const pool = new pg.Pool({
     connectionString,
     connectionTimeoutMillis: DATABASE_CONNECTION_TIMEOUT_MS,
