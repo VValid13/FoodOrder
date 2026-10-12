@@ -21,6 +21,9 @@ export class DbHealthIndicator{
 
                 return {breeds: breeds.length };
                  */
+                // test Querry db
+                //const result = await this.db.selectFrom('user').selectAll().execute();
+                //console.log(result);
                 try {
                     //await this.db.selectAll().execute()
                     await sql`select 1`.execute(this.db);

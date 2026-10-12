@@ -15,15 +15,15 @@ import type { DB } from './database.types.js';
     {
       provide: KYSELY_TOKEN,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<EnvironmentVariables, true>) =>
+      useFactory: (configService: ConfigService<EnvironmentVariables, true>) : Kysely<DB> =>
         createDatabase(configService.getOrThrow(ENV_KEYS.DATABASE_URL, { infer: true })),
     },
   ],
   exports: [KYSELY_TOKEN],
 })
 export class DatabaseModule implements OnApplicationShutdown {
+  //constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
   constructor(@InjectKysely() private readonly db: Kysely<DB>) {}
-
   async onApplicationShutdown(): Promise<void> {
     await this.db.destroy();
   }
