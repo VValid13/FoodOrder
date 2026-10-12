@@ -1,5 +1,5 @@
 import { EnvironmentVariables } from '../config/env.config.js';
-import {ValueOf} from "../utils.types.js";
+import { ValueOf } from '../utils.types.js';
 
 export const ENV_KEYS = {
   PORT: 'PORT',

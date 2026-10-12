@@ -1,4 +1,4 @@
-import {ValueOf} from "../utils.types.js";
+import { ValueOf } from '../utils.types.js';
 
 export const ERROR_KEYS = {
   DATABASE_UNAVAILABLE: '08006',
