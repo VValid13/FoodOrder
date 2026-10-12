@@ -27,7 +27,7 @@ export class HealthController {
   @HealthCheck()
   check(){
     return this.health.check([
-      () => this.db.isHealthy('database').withTimeout(1000),
+      () => this.db.isHealthy('database'),
       //() => this.http.pingCheck('http connection check','validUrl'),
     ])
   }

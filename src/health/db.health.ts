@@ -11,10 +11,20 @@ export class DbHealthIndicator{
         private readonly healthIndicatorService: HealthIndicatorService,
     ) {}
 
-    isHealthy(key: string) {
-        return this.healthIndicatorService
-            .check(key)
-            .attempt( async ({signal}) => {
+    async isHealthy(key: string) {
+
+        const indicator = this.healthIndicatorService.check(key);
+        try {
+            //await this.db.selectAll().execute()
+            await sql`select 1`.execute(this.db);
+            return indicator.up();
+        } catch {
+            return indicator.down({postgres: 'not reachable'});
+        }
+
+        //return this.healthIndicatorService
+        //    .check(key)
+        //    .attempt( async ({signal}) => {
                 /*
                 const response = await fetch('localhost:5432', {signal});
                 const {message: breeds} = await response.json();
@@ -24,6 +34,8 @@ export class DbHealthIndicator{
                 // test Querry db
                 //const result = await this.db.selectFrom('user').selectAll().execute();
                 //console.log(result);
+
+                /*
                 try {
                     //await this.db.selectAll().execute()
                     await sql`select 1`.execute(this.db);
@@ -31,7 +43,7 @@ export class DbHealthIndicator{
                 } catch {
                     return {message: 'testMsg'};
                 }
-            })
-            .withTimeout(1000);
-    }
+                 */
+
+            }
 }
