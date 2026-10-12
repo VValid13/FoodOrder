@@ -22,6 +22,4 @@ import type { DatabaseTables } from './database.types.js';
   ],
   exports: [KYSELY_TOKEN],
 })
-export class DatabaseModule {
-  constructor(@InjectKysely() private readonly db: Kysely<DatabaseTables>) {}
-}
+export class DatabaseModule {}
