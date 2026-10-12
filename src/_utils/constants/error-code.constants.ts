@@ -1,7 +1,7 @@
 import {ValueOf} from "./env.constants.js";
 
-export const ErrorCode = {
-  DATABASE_UNAVAILABLE : '08006'
+export const ERROR_KEYS = {
+  DATABASE_UNAVAILABLE : '08006',
 } as const satisfies Record<string, string>;
-export type ErrorCode = ValueOf<typeof ErrorCode>
+export type ErrorCodeType = ValueOf<typeof ERROR_KEYS>;
 
