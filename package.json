@@ -13,6 +13,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main.js",
+    "lint": "oxlint --deny-warnings src",
+    "lint-format": "oxlint src/ && oxfmt src/",
     "format:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
     "infra:up": "docker compose up -d",

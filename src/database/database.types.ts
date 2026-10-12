@@ -1,13 +1,14 @@
 import {Generated} from "kysely";
+import {UUID} from "crypto";
 
 export interface UserTable{
-    id: Generated<number>;
+    id: Generated<UUID>;
     mail: string;
     password_hash: string;
     hashed_refresh_token: string;
     display_name: string;
 }
 
-export interface DB{
+export interface DatabaseTables {
     user: UserTable;
 }

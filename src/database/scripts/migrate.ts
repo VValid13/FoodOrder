@@ -16,7 +16,7 @@ function isMigrationAction(value: string | undefined): value is MigrationAction 
 }
 
 async function main(): Promise<void> {
-  const [action, target] = process.argv.slice(2);
+  const [action] = process.argv.slice(2);
 
   if (!isMigrationAction(action)) {
     throw new Error(`Unknown migration action. Expected one of: ${MIGRATION_ACTIONS.join(', ')}`);

@@ -1,3 +1,5 @@
+import {EnvironmentVariables} from "../config/env.config.js";
+
 export const ENV_KEYS = {
   PORT: 'PORT',
   DATABASE_URL: 'DATABASE_URL',
@@ -8,10 +10,11 @@ export const ENV_KEYS = {
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
   S3_SECRET_KEY: 'S3_SECRET_KEY',
   S3_BUCKET: 'S3_BUCKET',
-  S3_BUCKET_TEST: 'S3_BUCKET_TEST',
-} as const;
+} as const satisfies Record<string, keyof EnvironmentVariables>
 
-export type EnvKey = (typeof ENV_KEYS)[keyof typeof ENV_KEYS];
+export type EnvType = ValueOf<typeof ENV_KEYS>;
+export type ValueOf<T> = T[keyof T];
+//export type EnvKey = (typeof ENV_KEYS)[keyof typeof ENV_KEYS];
 
 export const ENV_FILE_PATH = '.env';
 export const MIN_PORT = 1;
