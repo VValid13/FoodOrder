@@ -1,5 +1,14 @@
 import { plainToInstance } from 'class-transformer';
-import { IsInt, IsUrl, Max, Min, validateSync } from 'class-validator';
+import {
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Max,
+  Min,
+  validateSync,
+} from 'class-validator';
 import { MAX_PORT, MIN_PORT } from '../constants/env.constants.js';
 import { IsNotEmptyString } from '../decorators/is-not-empty-string.decorator.js';
 
@@ -20,6 +29,16 @@ export class EnvironmentVariables {
 
   @IsNotEmptyString()
   JWT_REFRESH_SECRET: string;
+
+  @IsString()
+  JWT_EXPIRATION: string;
+
+  @IsNumber()
+  REFRESH_TOKEN_EXPIRATION_DAYS: number;
+
+  @IsString()
+  @IsOptional()
+  NODE_ENV: string;
 
   @IsUrl({ require_tld: false, require_protocol: true })
   S3_ENDPOINT: string;

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {ERROR_KEYS} from "../constants/error-code.constants.js";
-import type {ErrorCodeType} from "../constants/error-code.constants.js";
+import { ERROR_KEYS } from '../constants/error-code.constants.js';
+import type { ErrorCodeType } from '../constants/error-code.constants.js';
 
 export class ErrorResponseDto {
   @ApiProperty({ example: 503 })

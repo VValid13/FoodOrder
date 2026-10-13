@@ -3,12 +3,19 @@ import {UUID} from "crypto";
 
 export interface UserTable{
     id: Generated<UUID>;
-    mail: string;
+    username: string;
     password_hash: string;
-    hashed_refresh_token: string;
-    display_name: string;
+}
+
+export interface TokenTable{
+    id: Generated<UUID>;
+    token: string;
+    expireAt: Date;
+    status: boolean;
+    id_user: UUID
 }
 
 export interface DatabaseTables {
     user: UserTable;
+    token: TokenTable;
 }
