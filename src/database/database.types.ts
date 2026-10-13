@@ -4,7 +4,7 @@ import {UUID} from "crypto";
 export interface UserTable{
     id: Generated<UUID>;
     username: string;
-    password_hash: string;
+    passwordHash: string;
 }
 
 export interface TokenTable{

@@ -22,7 +22,10 @@ export class AuthService {
 
   async validateUser(username: string, password: string) {
     const user: UserSchema = await this.usersRepository.findOneByUsernameOrThrow(username);
-    const passwordStatus = await this.encryptionService.compare(password, user.password_hash);
+    console.log(user);
+    console.log(user.username);
+    console.log(`compare pass: ${password} with hash: ${user.passwordHash}`);
+    const passwordStatus = await this.encryptionService.compare(password, user.passwordHash);
 
     if (!passwordStatus) throw new UnauthorizedException('INVALID CREDENTIALS');
 

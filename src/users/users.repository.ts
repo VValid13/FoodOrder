@@ -30,7 +30,7 @@ export class UsersRepository {
       .values({
         id: newUUID,
         username: createUserDto.username,
-        password_hash: createUserDto.password,
+        passwordHash: createUserDto.password,
       })
       .executeTakeFirst();
     return await this.db
@@ -52,7 +52,7 @@ export class UsersRepository {
     return await this.db
       .updateTable('user')
       .set({
-        password_hash: new_password,
+        passwordHash: new_password,
       })
       .where('id', '=', id)
       .executeTakeFirstOrThrow();

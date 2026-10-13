@@ -5,5 +5,5 @@ export class UserSchema {
   @IsUUID()
   id: crypto.UUID;
   username: string;
-  password_hash: string;
+  passwordHash: string;
 }
