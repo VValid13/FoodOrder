@@ -7,17 +7,17 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn('user_id', 'uuid', (column) =>
       column.notNull().references('app_user.id').onDelete('cascade'),
     )
-    .addColumn('commande_id', 'uuid', (column) =>
-      column.notNull().references('commande.id').onDelete('cascade'),
+    .addColumn('customer_order_id', 'uuid', (column) =>
+      column.notNull().references('customer_order.id').onDelete('cascade'),
     )
     .addColumn('created_at', 'timestamptz', (column) => column.notNull().defaultTo(sql`now()`))
-    .addPrimaryKeyConstraint('favorite_pkey', ['user_id', 'commande_id'])
+    .addPrimaryKeyConstraint('favorite_pkey', ['user_id', 'customer_order_id'])
     .execute();
 
   await db.schema
-    .createIndex('favorite_commande_id_index')
+    .createIndex('favorite_customer_order_id_index')
     .on('favorite')
-    .column('commande_id')
+    .column('customer_order_id')
     .execute();
 }
 

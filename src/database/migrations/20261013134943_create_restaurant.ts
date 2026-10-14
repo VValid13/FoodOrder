@@ -3,7 +3,7 @@ import type { Kysely } from 'kysely';
 
 export async function up(db: Kysely<unknown>): Promise<void> {
   await db.schema
-    .createTable('resto')
+    .createTable('restaurant')
     .addColumn('id', 'uuid', (column) => column.primaryKey().defaultTo(sql`gen_random_uuid()`))
     .addColumn('name', 'text', (column) => column.notNull())
     .addColumn('address', 'text', (column) => column.notNull())
@@ -15,5 +15,5 @@ export async function up(db: Kysely<unknown>): Promise<void> {
 }
 
 export async function down(db: Kysely<unknown>): Promise<void> {
-  await db.schema.dropTable('resto').execute();
+  await db.schema.dropTable('restaurant').execute();
 }

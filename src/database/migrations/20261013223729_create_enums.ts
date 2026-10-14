@@ -7,12 +7,12 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .execute();
 
   await db.schema
-    .createType('commande_status')
+    .createType('order_status')
     .asEnum(['in_progress', 'validated', 'modified', 'cancelled'])
     .execute();
 
   await db.schema
-    .createType('join_status')
+    .createType('participant_status')
     .asEnum(['invited', 'seen', 'in_progress', 'validated', 'modified', 'cancelled'])
     .execute();
 
@@ -24,7 +24,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
 
 export async function down(db: Kysely<unknown>): Promise<void> {
   await db.schema.dropType('payback_method').execute();
-  await db.schema.dropType('join_status').execute();
-  await db.schema.dropType('commande_status').execute();
+  await db.schema.dropType('participant_status').execute();
+  await db.schema.dropType('order_status').execute();
   await db.schema.dropType('session_status').execute();
 }

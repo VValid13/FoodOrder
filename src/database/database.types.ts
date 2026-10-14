@@ -5,13 +5,13 @@
 
 import type { ColumnType } from "kysely";
 
-export type CommandeStatus = "cancelled" | "in_progress" | "modified" | "validated";
-
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type JoinStatus = "cancelled" | "in_progress" | "invited" | "modified" | "seen" | "validated";
+export type OrderStatus = "cancelled" | "in_progress" | "modified" | "validated";
+
+export type ParticipantStatus = "cancelled" | "in_progress" | "invited" | "modified" | "seen" | "validated";
 
 export type PaybackMethod = "card" | "cash" | "other" | "transfer";
 
@@ -27,79 +27,69 @@ export interface AppUser {
   username: string;
 }
 
-export interface Commande {
+export interface CustomerOrder {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
-  status: Generated<CommandeStatus>;
+  status: Generated<OrderStatus>;
   totalPriceCents: Generated<number>;
   updatedAt: Generated<Timestamp>;
   validatedAt: Timestamp | null;
 }
 
-export interface Contien {
-  commandeId: string;
-  optionId: string;
-  platId: string;
-}
-
-export interface Custom {
-  commandeId: string;
+export interface CustomItem {
   comments: string | null;
   createdAt: Generated<Timestamp>;
+  customerOrderId: string;
   id: Generated<string>;
   name: string;
   priceCents: number;
 }
 
-export interface Documents {
+export interface Dish {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  label: string;
+  priceCents: number;
+  restaurantId: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Document {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
   url: string;
 }
 
 export interface Favorite {
-  commandeId: string;
   createdAt: Generated<Timestamp>;
+  customerOrderId: string;
   userId: string;
 }
 
-export interface OpenPlanning {
-  openTimeId: string;
-  restoId: string;
-}
-
-export interface OpenTime {
-  closingTime: Timestamp;
+export interface OpeningSlot {
+  closesAt: Timestamp;
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
   label: string | null;
-  openingTime: Timestamp;
+  opensAt: Timestamp;
 }
 
 export interface Option {
   createdAt: Generated<Timestamp>;
+  dishId: string;
   id: Generated<string>;
   label: string;
-  platId: string;
   priceCents: Generated<number>;
   updatedAt: Generated<Timestamp>;
 }
 
-export interface Payers {
-  sessionId: string;
-  userId: string;
+export interface OrderItem {
+  customerOrderId: string;
+  dishId: string;
+  optionId: string;
 }
 
-export interface Plat {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  label: string;
-  priceCents: number;
-  restoId: string;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface Resto {
+export interface Restaurant {
   address: string;
   coordinates: string | null;
   createdAt: Generated<Timestamp>;
@@ -109,30 +99,40 @@ export interface Resto {
   updatedAt: Generated<Timestamp>;
 }
 
-export interface RestoDocuments {
-  documentsId: string;
-  restoId: string;
+export interface RestaurantDocument {
+  documentId: string;
+  restaurantId: string;
+}
+
+export interface RestaurantOpeningSlot {
+  openingSlotId: string;
+  restaurantId: string;
 }
 
 export interface Session {
   approxDeliveryTime: Timestamp | null;
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
-  restoId: string;
+  restaurantId: string;
   status: Generated<SessionStatus>;
   timeLimit: Timestamp;
   updatedAt: Generated<Timestamp>;
   userId: string;
 }
 
-export interface SessionJoin {
-  commandeId: string;
+export interface SessionParticipant {
   createdAt: Generated<Timestamp>;
+  customerOrderId: string;
   paidBack: Generated<boolean>;
   paybackMethod: PaybackMethod | null;
   sessionId: string;
-  status: Generated<JoinStatus>;
+  status: Generated<ParticipantStatus>;
   updatedAt: Generated<Timestamp>;
+  userId: string;
+}
+
+export interface SessionPayer {
+  sessionId: string;
   userId: string;
 }
 
@@ -152,20 +152,20 @@ export interface UserGroup {
 
 export interface DB {
   appUser: AppUser;
-  commande: Commande;
-  contien: Contien;
-  custom: Custom;
-  documents: Documents;
+  customerOrder: CustomerOrder;
+  customItem: CustomItem;
+  dish: Dish;
+  document: Document;
   favorite: Favorite;
-  openPlanning: OpenPlanning;
-  openTime: OpenTime;
+  openingSlot: OpeningSlot;
   option: Option;
-  payers: Payers;
-  plat: Plat;
-  resto: Resto;
-  restoDocuments: RestoDocuments;
+  orderItem: OrderItem;
+  restaurant: Restaurant;
+  restaurantDocument: RestaurantDocument;
+  restaurantOpeningSlot: RestaurantOpeningSlot;
   session: Session;
-  sessionJoin: SessionJoin;
+  sessionParticipant: SessionParticipant;
+  sessionPayer: SessionPayer;
   token: Token;
   userGroup: UserGroup;
 }
