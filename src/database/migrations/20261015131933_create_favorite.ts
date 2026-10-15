@@ -5,7 +5,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
   await db.schema
     .createTable('favorite')
     .addColumn('user_id', 'uuid', (column) =>
-      column.notNull().references('app_user.id').onDelete('cascade'),
+      column.notNull().references('user.id').onDelete('cascade'),
     )
     .addColumn('customer_order_id', 'uuid', (column) =>
       column.notNull().references('customer_order.id').onDelete('cascade'),

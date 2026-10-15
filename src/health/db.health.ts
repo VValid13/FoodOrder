@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import { Kysely } from 'kysely';
-import type { DB } from '../database/database.types.js';
+import type { DatabaseTables } from '../database/database.types.js';
 import { DATABASE_UNAVAILABLE_MESSAGE } from '../_utils/constants/health.constants.js';
 @Injectable()
 export class DbHealthIndicator {
   constructor(
-    @InjectKysely() private readonly db: Kysely<DB>,
+    @InjectKysely() private readonly db: Kysely<DatabaseTables>,
     private readonly healthIndicatorService: HealthIndicatorService,
   ) {}
 

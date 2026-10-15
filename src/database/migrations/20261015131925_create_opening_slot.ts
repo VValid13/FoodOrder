@@ -5,10 +5,12 @@ export async function up(db: Kysely<unknown>): Promise<void> {
   await db.schema
     .createTable('opening_slot')
     .addColumn('id', 'uuid', (column) => column.primaryKey().defaultTo(sql`gen_random_uuid()`))
-    .addColumn('opens_at', 'timestamptz', (column) => column.notNull())
-    .addColumn('closes_at', 'timestamptz', (column) => column.notNull())
+    .addColumn('day_of_week', 'smallint', (column) => column.notNull())
+    .addColumn('opens_at', 'time', (column) => column.notNull())
+    .addColumn('closes_at', 'time', (column) => column.notNull())
     .addColumn('label', 'text')
     .addColumn('created_at', 'timestamptz', (column) => column.notNull().defaultTo(sql`now()`))
+    .addCheckConstraint('opening_slot_day_of_week_check', sql`day_of_week between 1 and 7`)
     .addCheckConstraint('opening_slot_closes_after_opens_check', sql`closes_at > opens_at`)
     .execute();
 

@@ -9,55 +9,45 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type InvitationStatus = "accepted" | "declined" | "pending" | "revoked";
+
+export type MemberStatus = "active" | "left";
+
+export type OptionKind = "extra" | "removal" | "size";
+
 export type OrderStatus = "cancelled" | "in_progress" | "modified" | "validated";
 
-export type ParticipantStatus = "cancelled" | "in_progress" | "invited" | "modified" | "seen" | "validated";
-
-export type PaybackMethod = "card" | "cash" | "other" | "transfer";
+export type PaymentMethod = "card" | "cash" | "other" | "transfer";
 
 export type SessionStatus = "closed" | "draft" | "open" | "ordered";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export interface AppUser {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  passwordHash: string;
-  updatedAt: Generated<Timestamp>;
-  username: string;
-}
-
 export interface CustomerOrder {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
+  sessionMemberId: string;
   status: Generated<OrderStatus>;
-  totalPriceCents: Generated<number>;
+  totalPrice: Generated<number>;
   updatedAt: Generated<Timestamp>;
   validatedAt: Timestamp | null;
-}
-
-export interface CustomItem {
-  comments: string | null;
-  createdAt: Generated<Timestamp>;
-  customerOrderId: string;
-  id: Generated<string>;
-  name: string;
-  priceCents: number;
 }
 
 export interface Dish {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
   label: string;
-  priceCents: number;
-  restaurantId: string;
+  menuId: string;
+  price: number;
   updatedAt: Generated<Timestamp>;
 }
 
 export interface Document {
+  byteSize: number;
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
-  url: string;
+  key: string;
+  mimeType: string;
 }
 
 export interface Favorite {
@@ -66,27 +56,65 @@ export interface Favorite {
   userId: string;
 }
 
-export interface OpeningSlot {
-  closesAt: Timestamp;
+export interface Invitation {
+  createdAt: Generated<Timestamp>;
+  expiresAt: Timestamp | null;
+  id: Generated<string>;
+  recipientId: string | null;
+  sessionId: string;
+  status: Generated<InvitationStatus>;
+  tokenHash: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Menu {
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface OpeningSlot {
+  closesAt: string;
+  createdAt: Generated<Timestamp>;
+  dayOfWeek: number;
+  id: Generated<string>;
   label: string | null;
-  opensAt: Timestamp;
+  opensAt: string;
 }
 
 export interface Option {
   createdAt: Generated<Timestamp>;
   dishId: string;
   id: Generated<string>;
+  kind: OptionKind;
   label: string;
-  priceCents: Generated<number>;
+  price: Generated<number>;
   updatedAt: Generated<Timestamp>;
 }
 
 export interface OrderItem {
+  createdAt: Generated<Timestamp>;
   customerOrderId: string;
   dishId: string;
+  id: Generated<string>;
+  quantity: Generated<number>;
+  unitPrice: number;
+}
+
+export interface OrderItemOption {
   optionId: string;
+  orderItemId: string;
+}
+
+export interface Payment {
+  amount: number;
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  method: PaymentMethod;
+  paidAt: Generated<Timestamp>;
+  payerId: string;
+  receiverId: string;
 }
 
 export interface Restaurant {
@@ -94,8 +122,10 @@ export interface Restaurant {
   coordinates: string | null;
   createdAt: Generated<Timestamp>;
   id: Generated<string>;
+  menuId: string;
   name: string;
   phone: string | null;
+  timezone: Generated<string>;
   updatedAt: Generated<Timestamp>;
 }
 
@@ -112,27 +142,20 @@ export interface RestaurantOpeningSlot {
 export interface Session {
   approxDeliveryTime: Timestamp | null;
   createdAt: Generated<Timestamp>;
+  creatorId: string;
   id: Generated<string>;
   restaurantId: string;
   status: Generated<SessionStatus>;
   timeLimit: Timestamp;
   updatedAt: Generated<Timestamp>;
-  userId: string;
 }
 
-export interface SessionParticipant {
+export interface SessionMember {
   createdAt: Generated<Timestamp>;
-  customerOrderId: string;
-  paidBack: Generated<boolean>;
-  paybackMethod: PaybackMethod | null;
+  id: Generated<string>;
   sessionId: string;
-  status: Generated<ParticipantStatus>;
+  status: Generated<MemberStatus>;
   updatedAt: Generated<Timestamp>;
-  userId: string;
-}
-
-export interface SessionPayer {
-  sessionId: string;
   userId: string;
 }
 
@@ -144,28 +167,47 @@ export interface Token {
   userId: string;
 }
 
+export interface User {
+  createdAt: Generated<Timestamp>;
+  id: Generated<string>;
+  passwordHash: string;
+  updatedAt: Generated<Timestamp>;
+  username: string;
+}
+
 export interface UserGroup {
   createdAt: Generated<Timestamp>;
-  memberId: string;
+  id: Generated<string>;
+  label: string;
+  ownerId: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface UserGroupMember {
+  createdAt: Generated<Timestamp>;
+  userGroupId: string;
   userId: string;
 }
 
-export interface DB {
-  appUser: AppUser;
+export interface DatabaseTables {
   customerOrder: CustomerOrder;
-  customItem: CustomItem;
   dish: Dish;
   document: Document;
   favorite: Favorite;
+  invitation: Invitation;
+  menu: Menu;
   openingSlot: OpeningSlot;
   option: Option;
   orderItem: OrderItem;
+  orderItemOption: OrderItemOption;
+  payment: Payment;
   restaurant: Restaurant;
   restaurantDocument: RestaurantDocument;
   restaurantOpeningSlot: RestaurantOpeningSlot;
   session: Session;
-  sessionParticipant: SessionParticipant;
-  sessionPayer: SessionPayer;
+  sessionMember: SessionMember;
   token: Token;
+  user: User;
   userGroup: UserGroup;
+  userGroupMember: UserGroupMember;
 }

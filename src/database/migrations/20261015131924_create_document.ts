@@ -5,8 +5,11 @@ export async function up(db: Kysely<unknown>): Promise<void> {
   await db.schema
     .createTable('document')
     .addColumn('id', 'uuid', (column) => column.primaryKey().defaultTo(sql`gen_random_uuid()`))
-    .addColumn('url', 'text', (column) => column.notNull())
+    .addColumn('key', 'text', (column) => column.notNull().unique())
+    .addColumn('mime_type', 'text', (column) => column.notNull())
+    .addColumn('byte_size', 'integer', (column) => column.notNull())
     .addColumn('created_at', 'timestamptz', (column) => column.notNull().defaultTo(sql`now()`))
+    .addCheckConstraint('document_byte_size_check', sql`byte_size > 0`)
     .execute();
 
   await db.schema
