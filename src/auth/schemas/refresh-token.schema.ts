@@ -7,5 +7,5 @@ export class RefreshTokenSchema {
   token: string;
   expireAt: Date;
   status: boolean;
-  id_user: crypto.UUID;
+  idUser: crypto.UUID;
 }

@@ -5,12 +5,13 @@ import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserSchema } from './users.schema.js';
 import { CreateUserDto } from './_utils/dtos/requests/create-user.dto.js';
+import {EncryptionService} from "../encryption/encryption.service.js";
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectKysely() private readonly db: Kysely<DatabaseTables>,
-    //private readonly encriptionService: EncryptionService,
+    private readonly encriptionService: EncryptionService,
   ) {}
 
   async findById(id: UUID): Promise<UserSchema> {
@@ -23,14 +24,15 @@ export class UsersRepository {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserSchema> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserSchema> {
     const newUUID = crypto.randomUUID();
+    const passHash = await this.encriptionService.encrypt(createUserDto.password);
     await this.db
       .insertInto('user')
       .values({
         id: newUUID,
         username: createUserDto.username,
-        passwordHash: createUserDto.password,
+        passwordHash: passHash,
       })
       .executeTakeFirst();
     return await this.db

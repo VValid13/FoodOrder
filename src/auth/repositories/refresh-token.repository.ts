@@ -13,10 +13,10 @@ export class RefreshTokenRepository {
     const result = await this.db
       .insertInto('token')
       .values({
-        //id: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         token: hashedToken,
         expireAt: expireAt,
-        id_user: userId,
+        idUser: userId,
         status: false,
       })
       .executeTakeFirst();
@@ -29,7 +29,7 @@ export class RefreshTokenRepository {
       .set({
         status: true,
       })
-      .where('id_user', '=', id)
+      .where('idUser', '=', id)
       .executeTakeFirst();
     console.log(result);
   }

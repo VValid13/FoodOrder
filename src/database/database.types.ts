@@ -12,7 +12,7 @@ export interface TokenTable{
     token: string;
     expireAt: Date;
     status: boolean;
-    id_user: UUID
+    idUser: UUID
 }
 
 export interface DatabaseTables {

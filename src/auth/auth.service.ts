@@ -9,6 +9,7 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository.
 import { UserSchema } from '../users/users.schema.js';
 import { UsersRepository } from '../users/users.repository.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
+import {REFRESH_COOKIE} from "./_utils/constants/refresh-token.constants.js";
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
   }
 
   //Move in mapper?
-  private hasRefreshToken = (rawToken: string) =>
+  private hashRefreshToken = (rawToken: string) =>
     createHash('sha256').update(rawToken).digest('hex');
 
   async generateToken(user: UserSchema) {
@@ -46,7 +47,7 @@ export class AuthService {
 
     await this.refreshTokenRepository.create(
       user.id,
-      this.hasRefreshToken(rawRefreshToken),
+      this.hashRefreshToken(rawRefreshToken),
       expireAt,
     );
     return { accessToken, refreshToken: rawRefreshToken, refreshTokenExpireAt: expireAt };
@@ -54,13 +55,13 @@ export class AuthService {
 
   async refreshTokens(rawToken: string) {
     const tokenDoc = await this.refreshTokenRepository.findValidByTokenHashAndRevoke(
-      this.hasRefreshToken(rawToken),
+      this.hashRefreshToken(rawToken),
     );
     if (!tokenDoc) {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
 
-    const user = await this.usersRepository.findById(tokenDoc.id_user);
+    const user = await this.usersRepository.findById(tokenDoc.idUser);
     if (!user) {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
@@ -69,6 +70,6 @@ export class AuthService {
   }
 
   logout(rawToken: string) {
-    return this.refreshTokenRepository.revokeByTokenHash(this.hasRefreshToken(rawToken));
+    return this.refreshTokenRepository.revokeByTokenHash(this.hashRefreshToken(rawToken));
   }
 }

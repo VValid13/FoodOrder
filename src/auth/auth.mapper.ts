@@ -7,7 +7,7 @@ export class AuthMapper {
   toRefreshTokenSchema(result: TokenTable): RefreshTokenSchema {
     const schema: RefreshTokenSchema = {
       id: crypto.randomUUID(), //result.id, // SO NEST WONT COMPLAIN
-      id_user: result.id_user,
+      idUser: result.idUser,
       token: result.token,
       expireAt: result.expireAt,
       status: result.status,
