@@ -57,7 +57,7 @@ export class AuthService {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
 
-    const user = await this.usersRepository.findById(tokenDoc.idUser);
+    const user = await this.usersRepository.findById(tokenDoc.userId);
     if (!user) {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }

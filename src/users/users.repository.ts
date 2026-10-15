@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
@@ -15,11 +15,13 @@ export class UsersRepository {
   ) {}
 
   async findById(id: UUID): Promise<UserSchema> {
-    return await this.db
+    const result = await this.db
       .selectFrom('user')
       .selectAll()
       .where('id', '=', id)
-      .executeTakeFirstOrThrow();
+      .executeTakeFirst();
+    if(!result) {throw new NotFoundException('unknown id');}
+    return result;
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<UserSchema> {

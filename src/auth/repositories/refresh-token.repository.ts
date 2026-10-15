@@ -14,10 +14,10 @@ export class RefreshTokenRepository {
       .insertInto('token')
       .values({
         id: crypto.randomUUID(),
-        token: hashedToken,
+        tokenHash: hashedToken,
         expireAt: expireAt,
-        idUser: userId,
-        status: false,
+        userId: userId,
+        isActive: true,
       })
       .executeTakeFirst();
   }
@@ -26,9 +26,9 @@ export class RefreshTokenRepository {
     await this.db
       .updateTable('token')
       .set({
-        status: true,
+        isActive: false,
       })
-      .where('idUser', '=', id)
+      .where('userId', '=', id)
       .executeTakeFirst();
   }
 
@@ -36,14 +36,14 @@ export class RefreshTokenRepository {
     const validToken = await this.db
       .selectFrom('token')
       .selectAll()
-      .where('token', '=', tokenHash)
-      .where('status', '=', false)
+      .where('tokenHash', '=', tokenHash)
+      .where('isActive', '=', true)
       .executeTakeFirst();
     if (!validToken) throw new UnauthorizedException('Invalid Refresh token');
     await this.db
       .updateTable('token')
       .set({
-        status: true,
+        isActive: false,
       })
       .where('id', '=', validToken.id)
       .executeTakeFirst();
@@ -54,9 +54,9 @@ export class RefreshTokenRepository {
     await this.db
       .updateTable('token')
       .set({
-        status: true,
+        isActive: false,
       })
-      .where('token', '=', tokenHash)
+      .where('tokenHash', '=', tokenHash)
       .executeTakeFirst();
   }
 
@@ -65,7 +65,7 @@ export class RefreshTokenRepository {
       .selectFrom('token')
       .selectAll()
       .where('id', '=', id)
-      .where('status', '=', false)
+      .where('isActive', '=', true)
       .executeTakeFirstOrThrow();
   }
 }

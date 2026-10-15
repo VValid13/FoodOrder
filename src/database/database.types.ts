@@ -9,10 +9,10 @@ export interface UserTable{
 
 export interface TokenTable{
     id: Generated<UUID>;
-    token: string;
+    tokenHash: string;
     expireAt: Date;
-    status: boolean;
-    idUser: UUID
+    isActive: boolean;
+    userId: UUID
 }
 
 export interface DatabaseTables {

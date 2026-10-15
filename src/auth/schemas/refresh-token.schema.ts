@@ -4,8 +4,8 @@ import * as crypto from 'crypto';
 export class RefreshTokenSchema {
   @IsUUID()
   id: crypto.UUID;
-  token: string;
+  tokenHash: string;
   expireAt: Date;
-  status: boolean;
-  idUser: crypto.UUID;
+  isActive: boolean;
+  userId: crypto.UUID;
 }
