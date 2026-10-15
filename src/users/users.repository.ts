@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserSchema } from './users.schema.js';
 import { CreateUserDto } from './_utils/dtos/requests/create-user.dto.js';
-import {EncryptionService} from "../encryption/encryption.service.js";
+import { EncryptionService } from '../encryption/encryption.service.js';
 
 @Injectable()
 export class UsersRepository {
@@ -15,13 +15,11 @@ export class UsersRepository {
   ) {}
 
   async findById(id: UUID): Promise<UserSchema> {
-    const user = await this.db
+    return await this.db
       .selectFrom('user')
       .selectAll()
       .where('id', '=', id)
       .executeTakeFirstOrThrow();
-    console.log(user);
-    return user;
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<UserSchema> {
@@ -42,12 +40,16 @@ export class UsersRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async findOneByUsernameOrThrow(username: string): Promise<UserSchema> {
-    return await this.db
+  async findOneByUsername(username: string): Promise<UserSchema> {
+    const result = await this.db
       .selectFrom('user')
       .selectAll()
       .where('username', '=', username)
-      .executeTakeFirstOrThrow();
+      .executeTakeFirst();
+    if (!result) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
+    return result;
   }
 
   async updatePasswordById(id: UUID, new_password: string) {

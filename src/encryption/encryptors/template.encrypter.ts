@@ -1,4 +1,3 @@
-
 export abstract class Encrypter {
   abstract readonly name: string;
   abstract readonly securityLevel: number;

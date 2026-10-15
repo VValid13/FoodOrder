@@ -9,7 +9,6 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository.
 import { UserSchema } from '../users/users.schema.js';
 import { UsersRepository } from '../users/users.repository.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
-import {REFRESH_COOKIE} from "./_utils/constants/refresh-token.constants.js";
 
 @Injectable()
 export class AuthService {
@@ -22,10 +21,7 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string) {
-    const user: UserSchema = await this.usersRepository.findOneByUsernameOrThrow(username);
-    console.log(user);
-    console.log(user.username);
-    console.log(`compare pass: ${password} with hash: ${user.passwordHash}`);
+    const user: UserSchema = await this.usersRepository.findOneByUsername(username);
     const passwordStatus = await this.encryptionService.compare(password, user.passwordHash);
 
     if (!passwordStatus) throw new UnauthorizedException('INVALID CREDENTIALS');

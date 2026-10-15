@@ -5,11 +5,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { EncryptionModule } from '../encryption/encryption.module.js';
 import { UsersRepository } from './users.repository.js';
 import { UsersController } from './users.controller.js';
-import {UserMapper} from "./users.mapper.js";
+import { UserMapper } from './users.mapper.js';
 
 @Module({
   imports: [TerminusModule, forwardRef(() => JwtModule), EncryptionModule],
-  providers: [UsersService, UsersRepository,UserMapper],
+  providers: [UsersService, UsersRepository, UserMapper],
   exports: [UsersService, UsersRepository],
   controllers: [UsersController],
 })
