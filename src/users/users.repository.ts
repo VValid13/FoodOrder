@@ -7,9 +7,7 @@ import { UserSchema } from './users.schema.js';
 
 @Injectable()
 export class UsersRepository {
-  constructor(
-    @InjectKysely() private readonly db: Kysely<DatabaseTables>,
-  ) {}
+  constructor(@InjectKysely() private readonly db: Kysely<DatabaseTables>) {}
 
   async findById(id: UUID): Promise<UserSchema> {
     const result = await this.db
@@ -24,7 +22,6 @@ export class UsersRepository {
   }
 
   async createUser(userInfos: UserSchema) {
-
     return this.db
       .insertInto('user')
       .values({

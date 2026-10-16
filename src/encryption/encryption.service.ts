@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Encrypter } from './encryptors/template.encrypter.js';
 import { BcryptEncrypter } from './encryptors/bcrypt.encrypter.js';
 
-
 @Injectable()
 export class EncryptionService {
   private Encryptor: Encrypter;

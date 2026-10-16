@@ -7,7 +7,7 @@ import { UsersController } from './users.controller.js';
 import { UserMapper } from './users.mapper.js';
 
 @Module({
-  imports: [ forwardRef(() => JwtModule), EncryptionModule],
+  imports: [forwardRef(() => JwtModule), EncryptionModule],
   providers: [UsersService, UsersRepository, UserMapper],
   exports: [UsersService, UsersRepository],
   controllers: [UsersController],

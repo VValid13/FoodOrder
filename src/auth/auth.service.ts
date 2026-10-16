@@ -6,23 +6,23 @@ import { createHash, randomBytes } from 'node:crypto';
 import dayjs from 'dayjs';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { UserSchema } from '../users/users.schema.js';
-import { UsersRepository } from '../users/users.repository.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
-import {AuthMapper} from "./auth.mapper.js";
+import { AuthMapper } from './auth.mapper.js';
+import { UsersService } from '../users/users.service.js';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly encryptionService: EncryptionService,
+    private readonly userService: UsersService,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly configService: ConfigService<EnvironmentVariables, true>,
     private readonly authMapper: AuthMapper,
   ) {}
 
   async validateUser(username: string, password: string) {
-    const user = await this.usersRepository.findOneByUsername(username);
+    const user = await this.userService.getUserByUsername(username);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials.');
     }
@@ -60,7 +60,7 @@ export class AuthService {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
     await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
-    const user = await this.usersRepository.findById(refreshSchema.userId);
+    const user = await this.userService.getUserById(refreshSchema.userId);
     if (!user) {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
