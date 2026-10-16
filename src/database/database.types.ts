@@ -5,11 +5,14 @@ export interface UserTable{
     id: Generated<UUID>;
     username: string;
     passwordHash: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface TokenTable{
     id: Generated<UUID>;
     tokenHash: string;
+    createdAt: Date;
     expireAt: Date;
     isActive: boolean;
     userId: UUID

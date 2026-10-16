@@ -18,6 +18,7 @@ export class RefreshTokenRepository {
         expireAt,
         userId: userId,
         isActive: true,
+        createdAt: new Date(),
       })
       .executeTakeFirst();
   }

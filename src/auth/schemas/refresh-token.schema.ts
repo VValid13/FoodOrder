@@ -8,4 +8,5 @@ export class RefreshTokenSchema {
   expireAt: Date;
   isActive: boolean;
   userId: crypto.UUID;
+  createdAt: Date;
 }

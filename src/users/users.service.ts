@@ -15,11 +15,15 @@ export class UsersService {
     private readonly encryptionService: EncryptionService,
   ) {}
   async createUser(createUserDto: CreateUserDto): Promise<UserSchema> {
+    const existingUser = await this.userRepository.findOneByUsername(createUserDto.username);
+    if(existingUser != undefined) {throw new HttpException('username already used', HttpStatus.BAD_REQUEST); }
     const hashedPass = await this.encryptionService.encrypt(createUserDto.password);
     const userInfo: UserSchema = {
       id : crypto.randomUUID(),
       username: createUserDto.username,
       passwordHash :hashedPass,
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
     const insertResult = this.userRepository.createUser(userInfo);
     if(!insertResult){ throw new HttpException('error while creating user', HttpStatus.NOT_FOUND); } // Rework error

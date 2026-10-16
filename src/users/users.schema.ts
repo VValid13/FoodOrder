@@ -6,4 +6,6 @@ export class UserSchema {
   id: crypto.UUID;
   username: string;
   passwordHash: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

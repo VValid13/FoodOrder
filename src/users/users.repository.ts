@@ -28,9 +28,7 @@ export class UsersRepository {
     return this.db
       .insertInto('user')
       .values({
-        id: userInfos.id,
-        username: userInfos.username,
-        passwordHash: userInfos.passwordHash,
+        ...userInfos,
       })
       .executeTakeFirst();
   }
