@@ -3,7 +3,7 @@ import { InjectKysely } from '../../_utils/decorators/inject-kysely.decorator.js
 import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../../database/database.types.js';
 import { UUID } from 'crypto';
-import { RefreshTokenSchema } from '../schemas/refresh-token.schema.js';
+import { RefreshTokenEntity } from '../entity/refresh-token.entity.js';
 
 @Injectable()
 export class RefreshTokenRepository {
@@ -33,7 +33,7 @@ export class RefreshTokenRepository {
       .executeTakeFirst();
   }
 
-  async findIdByValidTokenHash(tokenHash: string): Promise<RefreshTokenSchema | undefined> {
+  async findIdByValidTokenHash(tokenHash: string): Promise<RefreshTokenEntity | undefined> {
     return await this.db
       .selectFrom('token')
       .selectAll()

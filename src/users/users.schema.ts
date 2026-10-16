@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { IsUUID } from 'class-validator';
 
-export class UserSchema {
+export class UserEntity {
   @IsUUID()
   id: crypto.UUID;
   username: string;

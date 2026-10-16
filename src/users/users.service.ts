@@ -3,7 +3,7 @@ import { CreateUserDto } from './_utils/dtos/requests/create-user.dto.js';
 import { UUID } from 'crypto';
 import { UsersRepository } from './users.repository.js';
 import { UserMapper } from './users.mapper.js';
-import { UserSchema } from './users.schema.js';
+import { UserEntity } from './users.schema.js';
 import { GetUserDto } from './_utils/dtos/responses/get-user.dto.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
 
@@ -25,13 +25,13 @@ export class UsersService {
     return formatedName;
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserSchema> {
+  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
     const existingUser = await this.userRepository.findOneByUsername(createUserDto.username);
     if (existingUser !== undefined) {
       throw new HttpException('username already used', HttpStatus.BAD_REQUEST);
     }
     const hashedPass = await this.encryptionService.encrypt(createUserDto.password);
-    const userInfo: UserSchema = {
+    const userInfo: UserEntity = {
       id: crypto.randomUUID(),
       username: this.formatUsername(createUserDto.username),
       passwordHash: hashedPass,
@@ -58,5 +58,5 @@ export class UsersService {
     }
     return user;
   }
-  getUser = (user: UserSchema): GetUserDto => this.userMapper.toGetUserDto(user);
+  getUser = (user: UserEntity): GetUserDto => this.userMapper.toGetUserDto(user);
 }

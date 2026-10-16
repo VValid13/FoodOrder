@@ -1,7 +1,7 @@
 import { IsUUID } from 'class-validator';
 import * as crypto from 'crypto';
 
-export class RefreshTokenSchema {
+export class RefreshTokenEntity {
   @IsUUID()
   id: crypto.UUID;
   tokenHash: string;

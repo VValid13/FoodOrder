@@ -5,7 +5,7 @@ import { EnvironmentVariables } from '../_utils/config/env.config.js';
 import { createHash, randomBytes } from 'node:crypto';
 import dayjs from 'dayjs';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
-import { UserSchema } from '../users/users.schema.js';
+import { UserEntity } from '../users/users.schema.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
 import { AuthMapper } from './auth.mapper.js';
 import { UsersService } from '../users/users.service.js';
@@ -36,7 +36,7 @@ export class AuthService {
   private hashRefreshToken = (rawToken: string) =>
     createHash('sha256').update(rawToken).digest('hex');
 
-  async generateToken(user: UserSchema) {
+  async generateToken(user: UserEntity) {
     const payload = this.authMapper.toJwTokenInterface(user);
     const accessToken = this.jwtService.sign(payload);
     const rawRefreshToken = randomBytes(40).toString('hex');

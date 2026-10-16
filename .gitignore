@@ -2,6 +2,7 @@ node_modules
 dist
 coverage
 .env
+.env.dev
 *.tsbuildinfo
 .DS_Store
 .idea
