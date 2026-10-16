@@ -5,7 +5,7 @@ import { EnvironmentVariables } from '../_utils/config/env.config.js';
 import { createHash, randomBytes } from 'node:crypto';
 import dayjs from 'dayjs';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
-import { UserEntity } from '../users/users.schema.js';
+import { UserEntity } from '../users/users.entity.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
 import { AuthMapper } from './auth.mapper.js';
 import { UsersService } from '../users/users.service.js';
@@ -32,7 +32,6 @@ export class AuthService {
     return user;
   }
 
-  //Move in mapper?
   private hashRefreshToken = (rawToken: string) =>
     createHash('sha256').update(rawToken).digest('hex');
 

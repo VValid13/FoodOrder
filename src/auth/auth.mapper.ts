@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity } from '../users/users.schema.js';
+import { UserEntity } from '../users/users.entity.js';
 
 @Injectable()
 export class AuthMapper {

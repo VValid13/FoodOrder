@@ -1,24 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
-import { UserEntity } from './users.schema.js';
+import { UserEntity } from './users.entity.js';
 
 @Injectable()
 export class UsersRepository {
   constructor(@InjectKysely() private readonly db: Kysely<DatabaseTables>) {}
 
-  async findById(id: UUID): Promise<UserEntity> {
-    const result = await this.db
+  async findById(id: UUID): Promise<UserEntity | undefined> {
+    return await this.db
       .selectFrom('user')
       .selectAll()
       .where('id', '=', id)
       .executeTakeFirst();
-    if (!result) {
-      throw new NotFoundException('unknown id');
-    }
-    return result;
   }
 
   async createUser(userInfos: UserEntity) {
@@ -30,11 +26,11 @@ export class UsersRepository {
       .executeTakeFirst();
   }
 
-  async findOneByUsername(username: string): Promise<UserEntity | undefined> {
+  async findOneByUsername(formatedUsername: string): Promise<UserEntity | undefined> {
     return await this.db
       .selectFrom('user')
       .selectAll()
-      .where('username', '=', username)
+      .where('username', '=', formatedUsername)
       .executeTakeFirst();
   }
 

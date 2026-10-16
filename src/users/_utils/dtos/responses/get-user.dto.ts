@@ -10,6 +10,5 @@ export class GetUserDto {
 
   @ApiProperty({ example: 'Username' })
   @IsNotEmpty()
-  //@IsUnique(User, { excludeDeleted: false }) // need isUnique utls
   username: string;
 }
