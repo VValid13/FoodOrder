@@ -10,11 +10,7 @@ export class UsersRepository {
   constructor(@InjectKysely() private readonly db: Kysely<DatabaseTables>) {}
 
   async findById(id: UUID): Promise<UserEntity | undefined> {
-    return await this.db
-      .selectFrom('user')
-      .selectAll()
-      .where('id', '=', id)
-      .executeTakeFirst();
+    return await this.db.selectFrom('user').selectAll().where('id', '=', id).executeTakeFirst();
   }
 
   async createUser(userInfos: UserEntity) {

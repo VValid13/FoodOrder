@@ -16,13 +16,15 @@ export class UsersService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const existingUser = await this.userRepository.findOneByUsername(this.userMapper.formatUsername(createUserDto.username));
+    const existingUser = await this.userRepository.findOneByUsername(
+      this.userMapper.formatUsername(createUserDto.username),
+    );
     if (existingUser) {
       throw new HttpException('username already used', HttpStatus.BAD_REQUEST);
     }
     const newUserEntity: UserEntity = this.userMapper.toNewEntity(
-        createUserDto,
-        await this.encryptionService.encrypt(createUserDto.password)
+      createUserDto,
+      await this.encryptionService.encrypt(createUserDto.password),
     );
     const insertResult = this.userRepository.createUser(newUserEntity);
     if (!insertResult) {

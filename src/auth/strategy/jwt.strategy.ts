@@ -4,12 +4,12 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables } from '../../_utils/config/env.config.js';
 import { JwtPayloadInterface } from '../_utils/interfaces/jwt-payload.interface.js';
-import {UsersService} from "../../users/users.service.js";
+import { UsersService } from '../../users/users.service.js';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-      private readonly userService: UsersService,
+    private readonly userService: UsersService,
     configService: ConfigService<EnvironmentVariables, true>,
   ) {
     super({
