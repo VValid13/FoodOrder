@@ -5,7 +5,6 @@ import StrongPasswordDecorator from '../../../../_utils/decorators/strong-passwo
 export class CreateUserDto {
   @ApiProperty({ example: 'UserName' })
   @IsNotEmpty()
-  //@IsUnique(User, { excludeDeleted: false }) // need isUnique utls
   username: string;
 
   @ApiProperty({ example: 'Str0ng$P4ssword' })

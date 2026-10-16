@@ -4,14 +4,11 @@ import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserSchema } from './users.schema.js';
-import { CreateUserDto } from './_utils/dtos/requests/create-user.dto.js';
-import { EncryptionService } from '../encryption/encryption.service.js';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectKysely() private readonly db: Kysely<DatabaseTables>,
-    private readonly encriptionService: EncryptionService,
   ) {}
 
   async findById(id: UUID): Promise<UserSchema> {
@@ -26,22 +23,16 @@ export class UsersRepository {
     return result;
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserSchema> {
-    const newUUID = crypto.randomUUID();
-    const passHash = await this.encriptionService.encrypt(createUserDto.password);
-    await this.db
+  async createUser(userInfos: UserSchema) {
+
+    return this.db
       .insertInto('user')
       .values({
-        id: newUUID,
-        username: createUserDto.username,
-        passwordHash: passHash,
+        id: userInfos.id,
+        username: userInfos.username,
+        passwordHash: userInfos.passwordHash,
       })
       .executeTakeFirst();
-    return await this.db
-      .selectFrom('user')
-      .selectAll()
-      .where('id', '=', newUUID)
-      .executeTakeFirstOrThrow();
   }
 
   async findOneByUsername(username: string): Promise<UserSchema | undefined> {

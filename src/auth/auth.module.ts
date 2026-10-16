@@ -4,7 +4,6 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvironmentVariables } from '../_utils/config/env.config.js';
-import { TerminusModule } from '@nestjs/terminus';
 import { EncryptionModule } from '../encryption/encryption.module.js';
 import { AuthService } from './auth.service.js';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
@@ -25,7 +24,6 @@ import {AuthMapper} from "./auth.mapper.js";
       }),
     }),
     EncryptionModule,
-    TerminusModule,// need check
   ],
   providers: [AuthService, AuthMapper, JwtStrategy, RefreshTokenRepository],
   exports: [AuthService],

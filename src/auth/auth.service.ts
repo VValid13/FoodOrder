@@ -4,7 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables } from '../_utils/config/env.config.js';
 import { createHash, randomBytes } from 'node:crypto';
 import dayjs from 'dayjs';
-import {JwtPayloadInterface} from './_utils/interfaces/jwt-payload.interface.js';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { UserSchema } from '../users/users.schema.js';
 import { UsersRepository } from '../users/users.repository.js';

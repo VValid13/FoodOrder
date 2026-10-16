@@ -2,12 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Encrypter } from './encryptors/template.encrypter.js';
 import { BcryptEncrypter } from './encryptors/bcrypt.encrypter.js';
 
-/*
-interface PasswordStatus{
-    isPasswordValid: boolean;
-    hasEncryptionChanged: boolean;
-}
-*/
 
 @Injectable()
 export class EncryptionService {
