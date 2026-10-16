@@ -23,7 +23,7 @@
     "migrate:up": "tsx --env-file=.env src/database/scripts/migrate.ts up",
     "migrate:down": "tsx --env-file=.env src/database/scripts/migrate.ts down",
     "migrate:make": "tsx src/database/scripts/make-migration.ts",
-    "db:types": "kysely-codegen --camel-case --env-file .env --out-file src/database/database.types.ts"
+    "db:types": "kysely-codegen --config-file src/database/kysely-codegen.config.cjs --camel-case --env-file .env --out-file src/database/database.types.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1147.0",
