@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
@@ -20,7 +20,9 @@ export class UsersRepository {
       .selectAll()
       .where('id', '=', id)
       .executeTakeFirst();
-    if(!result) {throw new NotFoundException('unknown id');}
+    if (!result) {
+      throw new NotFoundException('unknown id');
+    }
     return result;
   }
 
@@ -42,16 +44,12 @@ export class UsersRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async findOneByUsername(username: string): Promise<UserSchema> {
-    const result = await this.db
+  async findOneByUsername(username: string): Promise<UserSchema | undefined> {
+    return await this.db
       .selectFrom('user')
       .selectAll()
       .where('username', '=', username)
       .executeTakeFirst();
-    if (!result) {
-      throw new UnauthorizedException('Invalid credentials.');
-    }
-    return result;
   }
 
   async updatePasswordById(id: UUID, new_password: string) {

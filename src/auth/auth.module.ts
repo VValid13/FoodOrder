@@ -10,6 +10,7 @@ import { AuthService } from './auth.service.js';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { AuthController } from './auth.controller.js';
 import { JwtStrategy } from './strategy/jwt.strategy.js';
+import {AuthMapper} from "./auth.mapper.js";
 
 @Module({
   imports: [
@@ -24,9 +25,9 @@ import { JwtStrategy } from './strategy/jwt.strategy.js';
       }),
     }),
     EncryptionModule,
-    TerminusModule,
+    TerminusModule,// need check
   ],
-  providers: [AuthService, JwtStrategy, RefreshTokenRepository],
+  providers: [AuthService, AuthMapper, JwtStrategy, RefreshTokenRepository],
   exports: [AuthService],
   controllers: [AuthController],
 })

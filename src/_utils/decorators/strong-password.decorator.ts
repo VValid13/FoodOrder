@@ -11,7 +11,7 @@ const isStrongPasswordOptions: IsStrongPasswordOptions = {
 };
 
 const StrongPasswordMessage =
-  'The Password must be at least 8 characters long, 1 lowercase letter, 1 uppercase letter, 1number and 1 symbol.';
+  'The Password must be at least 12 characters long, 1 lowercase letter, 1 uppercase letter, 1number and 1 symbol.';
 
 export default function () {
   return applyDecorators(

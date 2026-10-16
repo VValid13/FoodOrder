@@ -1,6 +1,6 @@
 import { UUID } from 'crypto';
 
-export default interface JwtPayloadInterface {
+export type JwtPayloadInterface = {
   id: UUID;
   username: string;
-}
+};

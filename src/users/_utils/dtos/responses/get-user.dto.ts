@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsUUID } from 'class-validator';
-import StrongPasswordDecorator from '../../../../_utils/decorators/strong-password.decorator.js';
 import * as crypto from 'crypto';
 
 export class GetUserDto {
@@ -9,7 +8,7 @@ export class GetUserDto {
   @IsUUID()
   id: crypto.UUID;
 
-  @ApiProperty({ example: 'UserName' })
+  @ApiProperty({ example: 'Username' })
   @IsNotEmpty()
   //@IsUnique(User, { excludeDeleted: false }) // need isUnique utls
   username: string;

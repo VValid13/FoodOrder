@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectKysely } from '../../_utils/decorators/inject-kysely.decorator.js';
 import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../../database/database.types.js';
@@ -15,14 +15,14 @@ export class RefreshTokenRepository {
       .values({
         id: crypto.randomUUID(),
         tokenHash: hashedToken,
-        expireAt: expireAt,
+        expireAt,
         userId: userId,
         isActive: true,
       })
       .executeTakeFirst();
   }
 
-  async revokeById(id: UUID): Promise<void> {
+  async revokeByUserId(id: UUID): Promise<void> {
     await this.db
       .updateTable('token')
       .set({
@@ -32,22 +32,13 @@ export class RefreshTokenRepository {
       .executeTakeFirst();
   }
 
-  async findValidByTokenHashAndRevoke(tokenHash: string): Promise<RefreshTokenSchema | null> {
-    const validToken = await this.db
+  async findIdByValidTokenHash(tokenHash: string): Promise<RefreshTokenSchema | undefined> {
+    return await this.db
       .selectFrom('token')
       .selectAll()
       .where('tokenHash', '=', tokenHash)
       .where('isActive', '=', true)
       .executeTakeFirst();
-    if (!validToken) throw new UnauthorizedException('Invalid Refresh token');
-    await this.db
-      .updateTable('token')
-      .set({
-        isActive: false,
-      })
-      .where('id', '=', validToken.id)
-      .executeTakeFirst();
-    return validToken; // Token before update
   }
 
   async revokeByTokenHash(tokenHash: string) {

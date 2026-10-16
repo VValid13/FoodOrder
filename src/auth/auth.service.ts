@@ -4,11 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables } from '../_utils/config/env.config.js';
 import { createHash, randomBytes } from 'node:crypto';
 import dayjs from 'dayjs';
-import JwtPayloadInterface from './_utils/interfaces/jwt-payload.interface.js';
+import {JwtPayloadInterface} from './_utils/interfaces/jwt-payload.interface.js';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { UserSchema } from '../users/users.schema.js';
 import { UsersRepository } from '../users/users.repository.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
+import {AuthMapper} from "./auth.mapper.js";
 
 @Injectable()
 export class AuthService {
@@ -18,12 +19,15 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly configService: ConfigService<EnvironmentVariables, true>,
+    private readonly authMapper: AuthMapper,
   ) {}
 
   async validateUser(username: string, password: string) {
-    const user: UserSchema = await this.usersRepository.findOneByUsername(username);
+    const user = await this.usersRepository.findOneByUsername(username);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
     const passwordStatus = await this.encryptionService.compare(password, user.passwordHash);
-
     if (!passwordStatus) throw new UnauthorizedException('INVALID CREDENTIALS');
 
     return user;
@@ -34,7 +38,7 @@ export class AuthService {
     createHash('sha256').update(rawToken).digest('hex');
 
   async generateToken(user: UserSchema) {
-    const payload: JwtPayloadInterface = { username: user.username, id: user.id };
+    const payload = this.authMapper.toJwTokenInterface(user);
     const accessToken = this.jwtService.sign(payload);
     const rawRefreshToken = randomBytes(40).toString('hex');
     const expireAt = dayjs()
@@ -50,14 +54,14 @@ export class AuthService {
   }
 
   async refreshTokens(rawToken: string) {
-    const tokenDoc = await this.refreshTokenRepository.findValidByTokenHashAndRevoke(
+    const refreshSchema = await this.refreshTokenRepository.findIdByValidTokenHash(
       this.hashRefreshToken(rawToken),
     );
-    if (!tokenDoc) {
+    if (!refreshSchema) {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
-
-    const user = await this.usersRepository.findById(tokenDoc.userId);
+    await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
+    const user = await this.usersRepository.findById(refreshSchema.userId);
     if (!user) {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }

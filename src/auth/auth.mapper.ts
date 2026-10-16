@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { RefreshTokenSchema } from './schemas/refresh-token.schema.js';
 import { TokenTable } from '../database/database.types.js';
+import {UserSchema} from "../users/users.schema.js";
 
 @Injectable()
 export class AuthMapper {
-  toRefreshTokenSchema(result: TokenTable): RefreshTokenSchema {
-    const schema: RefreshTokenSchema = {
-      id: crypto.randomUUID(), //result.id, // SO NEST WONT COMPLAIN
-      userId: result.userId,
-      tokenHash: result.tokenHash,
-      expireAt: result.expireAt,
-      isActive: result.isActive,
-    };
-    return schema;
-  }
+  toJwTokenInterface = (user: UserSchema) =>({
+    id: user.id,
+    username: user.username,
+  })
 }
