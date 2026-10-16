@@ -19,6 +19,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     )
     .addColumn('token_hash', 'text', (column) => column.notNull().unique())
     .addColumn('is_active', 'boolean', (column) => column.notNull().defaultTo(true))
+    .addColumn('expire_at', 'timestamptz', (column) => column.notNull())
     .addColumn('created_at', 'timestamptz', (column) => column.notNull().defaultTo(sql`now()`))
     .execute();
 

@@ -4,6 +4,7 @@
  */
 
 import type { ColumnType } from "kysely";
+import type { UUID } from "node:crypto";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -25,8 +26,8 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface CustomerOrder {
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  sessionMemberId: string;
+  id: Generated<UUID>;
+  sessionMemberId: UUID;
   status: Generated<OrderStatus>;
   totalPrice: Generated<number>;
   updatedAt: Generated<Timestamp>;
@@ -35,9 +36,9 @@ export interface CustomerOrder {
 
 export interface Dish {
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  id: Generated<UUID>;
   label: string;
-  menuId: string;
+  menuId: UUID;
   price: number;
   updatedAt: Generated<Timestamp>;
 }
@@ -45,23 +46,23 @@ export interface Dish {
 export interface Document {
   byteSize: number;
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  id: Generated<UUID>;
   key: string;
   mimeType: string;
 }
 
 export interface Favorite {
   createdAt: Generated<Timestamp>;
-  customerOrderId: string;
-  userId: string;
+  customerOrderId: UUID;
+  userId: UUID;
 }
 
 export interface Invitation {
   createdAt: Generated<Timestamp>;
   expiresAt: Timestamp | null;
-  id: Generated<string>;
-  recipientId: string | null;
-  sessionId: string;
+  id: Generated<UUID>;
+  recipientId: UUID | null;
+  sessionId: UUID;
   status: Generated<InvitationStatus>;
   tokenHash: string;
   updatedAt: Generated<Timestamp>;
@@ -69,7 +70,7 @@ export interface Invitation {
 
 export interface Menu {
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  id: Generated<UUID>;
   name: string;
   updatedAt: Generated<Timestamp>;
 }
@@ -78,15 +79,15 @@ export interface OpeningSlot {
   closesAt: string;
   createdAt: Generated<Timestamp>;
   dayOfWeek: number;
-  id: Generated<string>;
+  id: Generated<UUID>;
   label: string | null;
   opensAt: string;
 }
 
 export interface Option {
   createdAt: Generated<Timestamp>;
-  dishId: string;
-  id: Generated<string>;
+  dishId: UUID;
+  id: Generated<UUID>;
   kind: OptionKind;
   label: string;
   price: Generated<number>;
@@ -95,34 +96,34 @@ export interface Option {
 
 export interface OrderItem {
   createdAt: Generated<Timestamp>;
-  customerOrderId: string;
-  dishId: string;
-  id: Generated<string>;
+  customerOrderId: UUID;
+  dishId: UUID;
+  id: Generated<UUID>;
   quantity: Generated<number>;
   unitPrice: number;
 }
 
 export interface OrderItemOption {
-  optionId: string;
-  orderItemId: string;
+  optionId: UUID;
+  orderItemId: UUID;
 }
 
 export interface Payment {
   amount: number;
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  id: Generated<UUID>;
   method: PaymentMethod;
   paidAt: Generated<Timestamp>;
-  payerId: string;
-  receiverId: string;
+  payerId: UUID;
+  receiverId: UUID;
 }
 
 export interface Restaurant {
   address: string;
   coordinates: string | null;
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  menuId: string;
+  id: Generated<UUID>;
+  menuId: UUID;
   name: string;
   phone: string | null;
   timezone: Generated<string>;
@@ -130,21 +131,21 @@ export interface Restaurant {
 }
 
 export interface RestaurantDocument {
-  documentId: string;
-  restaurantId: string;
+  documentId: UUID;
+  restaurantId: UUID;
 }
 
 export interface RestaurantOpeningSlot {
-  openingSlotId: string;
-  restaurantId: string;
+  openingSlotId: UUID;
+  restaurantId: UUID;
 }
 
 export interface Session {
   approxDeliveryTime: Timestamp | null;
   createdAt: Generated<Timestamp>;
-  creatorId: string;
-  id: Generated<string>;
-  restaurantId: string;
+  creatorId: UUID;
+  id: Generated<UUID>;
+  restaurantId: UUID;
   status: Generated<SessionStatus>;
   timeLimit: Timestamp;
   updatedAt: Generated<Timestamp>;
@@ -152,24 +153,25 @@ export interface Session {
 
 export interface SessionMember {
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  sessionId: string;
+  id: Generated<UUID>;
+  sessionId: UUID;
   status: Generated<MemberStatus>;
   updatedAt: Generated<Timestamp>;
-  userId: string;
+  userId: UUID;
 }
 
 export interface Token {
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  expireAt: Timestamp;
+  id: Generated<UUID>;
   isActive: Generated<boolean>;
   tokenHash: string;
-  userId: string;
+  userId: UUID;
 }
 
 export interface User {
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  id: Generated<UUID>;
   passwordHash: string;
   updatedAt: Generated<Timestamp>;
   username: string;
@@ -177,16 +179,16 @@ export interface User {
 
 export interface UserGroup {
   createdAt: Generated<Timestamp>;
-  id: Generated<string>;
+  id: Generated<UUID>;
   label: string;
-  ownerId: string;
+  ownerId: UUID;
   updatedAt: Generated<Timestamp>;
 }
 
 export interface UserGroupMember {
   createdAt: Generated<Timestamp>;
-  userGroupId: string;
-  userId: string;
+  userGroupId: UUID;
+  userId: UUID;
 }
 
 export interface DatabaseTables {

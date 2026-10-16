@@ -6,6 +6,12 @@ const RENAMED_INTERFACE = 'export interface DatabaseTables {';
 const typeScriptSerializer = new TypeScriptSerializer();
 
 module.exports = {
+  customImports: {
+    UUID: 'node:crypto#UUID',
+  },
+  typeMapping: {
+    uuid: 'UUID',
+  },
   serializer: {
     serializeFile: (metadata, dialect, options) =>
       typeScriptSerializer
