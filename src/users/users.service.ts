@@ -6,6 +6,8 @@ import { UserMapper } from './users.mapper.js';
 import { UserEntity } from './users.entity.js';
 import { GetUserDto } from './_utils/dtos/responses/get-user.dto.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
+import {KyselyError} from "../_utils/filters/postgres.exeption.filter.js";
+import {ERROR_KEYS} from "../_utils/constants/error-code.constants.js";
 
 @Injectable()
 export class UsersService {
@@ -20,7 +22,10 @@ export class UsersService {
       this.userMapper.formatUsername(createUserDto.username),
     );
     if (existingUser) {
-      throw new HttpException('username already used', HttpStatus.BAD_REQUEST);
+      throw new KyselyError(
+          ERROR_KEYS.UNIQUE_VIOLATION,
+          "Username Already taken."
+      );
     }
     const newUserEntity: UserEntity = this.userMapper.toNewEntity(
       createUserDto,
@@ -28,21 +33,27 @@ export class UsersService {
     );
     const insertResult = this.userRepository.createUser(newUserEntity);
     if (!insertResult) {
-      throw new HttpException('error while creating user', HttpStatus.NOT_FOUND);
+      throw new HttpException('error while creating user', HttpStatus.BAD_REQUEST);
     }
     return newUserEntity;
   }
   async getUserById(id: UUID) {
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new NotFoundException('user not found');
+      throw new KyselyError(
+          ERROR_KEYS.NO_RESULT_ERROR,
+          "Id not found for user",
+      );
     }
     return user;
   }
   async getUserByUsername(username: string) {
     const user = await this.userRepository.findOneByUsername(username);
     if (!user) {
-      throw new NotFoundException('user not found');
+      throw new KyselyError(
+          ERROR_KEYS.NO_RESULT_ERROR,
+          "Username not found for user",
+      )
     }
     return user;
   }

@@ -20,7 +20,7 @@ export class RefreshTokenRepository {
         isActive: true,
         createdAt: new Date(),
       })
-      .executeTakeFirst();
+      .executeTakeFirstOrThrow();
   }
 
   async revokeByUserId(id: UUID): Promise<void> {
@@ -30,7 +30,7 @@ export class RefreshTokenRepository {
         isActive: false,
       })
       .where('userId', '=', id)
-      .executeTakeFirst();
+      .executeTakeFirstOrThrow();
   }
 
   async findIdByValidTokenHash(tokenHash: string): Promise<RefreshTokenEntity | undefined> {
@@ -39,7 +39,7 @@ export class RefreshTokenRepository {
       .selectAll()
       .where('tokenHash', '=', tokenHash)
       .where('isActive', '=', true)
-      .executeTakeFirst();
+      .executeTakeFirstOrThrow();
   }
 
   async revokeByTokenHash(tokenHash: string) {
@@ -49,7 +49,7 @@ export class RefreshTokenRepository {
         isActive: false,
       })
       .where('tokenHash', '=', tokenHash)
-      .executeTakeFirst();
+      .executeTakeFirstOrThrow();
   }
 
   async findValidById(id: UUID) {

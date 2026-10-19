@@ -10,8 +10,8 @@ export class UsersRepository {
   constructor(@InjectKysely() private readonly db: Kysely<DatabaseTables>) {}
 
   async findById(id: UUID): Promise<UserEntity | undefined> {
-    return await this.db.selectFrom('user').selectAll().where('id', '=', id).executeTakeFirst();
-  }
+      return await this.db.selectFrom('user').selectAll().where('id', '=', id).executeTakeFirst();
+    }
 
   async createUser(userInfos: UserEntity) {
     return this.db
@@ -19,15 +19,15 @@ export class UsersRepository {
       .values({
         ...userInfos,
       })
-      .executeTakeFirst();
+      .executeTakeFirstOrThrow();
   }
 
-  async findOneByUsername(formatedUsername: string): Promise<UserEntity | undefined> {
+  async findOneByUsername(formatedUsername: string): Promise<UserEntity> {
     return await this.db
       .selectFrom('user')
       .selectAll()
       .where('username', '=', formatedUsername)
-      .executeTakeFirst();
+      .executeTakeFirstOrThrow();
   }
 
   async updatePasswordById(id: UUID, new_password: string) {
