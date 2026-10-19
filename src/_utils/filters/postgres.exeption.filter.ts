@@ -1,8 +1,8 @@
 import {
     ArgumentsHost,
     Catch,
-    ExceptionFilter,
-    InternalServerErrorException,
+    ExceptionFilter, HttpException, HttpStatus,
+    InternalServerErrorException, NotFoundException,
 } from "@nestjs/common";
 import {DatabaseError} from "pg";
 import {ERROR_KEYS} from "../constants/error-code.constants.js";
@@ -13,29 +13,53 @@ import {
     ForeignKeyException,
     UsernameUnavailableExceptions, UUIDFormatException
 } from "../.exception.js";
-export class KyselyError {
+import {NoResultError} from "kysely";
+import {inspect} from "node:util";
+import {isInstance} from "class-validator";
+export class KyselyError extends Error{
     constructor(code: string, message: string) {
+        super();
         this.code = code
         this.message = message
     }
     code: string;
     message: string ;
 }
-@Catch(DatabaseError, KyselyError)
+@Catch()
 export class PostgresExeptionFilter implements ExceptionFilter{
-    catch(exception: DatabaseError | KyselyError, host: ArgumentsHost): any {
-        const response = host.switchToHttp().getResponse<Response>();
-        const httpException = this.toHttpException(exception);
-        response
-            .status(httpException.getStatus())
-            .json({
-                statusCode: httpException.errorCode,
-                code: exception.code,
-                message: httpException.getResponse()
+    catch(exception: any, host: ArgumentsHost): any {
+        if(exception && typeof exception.code === 'string' && exception.code.length === 5){
+            const httpException = this.toHttpException(exception);
+            const response = host.switchToHttp().getResponse<Response>();
+            response
+                .status(httpException.getStatus())
+                .json({
+                    statusCode: httpException.errorCode,
+                    code: exception.code,
+                    message: httpException.getResponse()
+                });
+        }
+        else if(exception instanceof NoResultError){
+            const status = HttpStatus.NOT_FOUND;
+            const response = host.switchToHttp().getResponse<Response>();
+            return response.status(status).json({
+                statusCode: status,
+                code: '404',
+                message: exception.message || 'No Result exception',
             });
+        }
+        else{
+            const status = exception.getStatus ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+            const response = host.switchToHttp().getResponse<Response>();
+            return response.status(status).json({
+                statusCode: status,
+                code: exception.code || '02000',
+                message: exception.message || 'Internal server error',
+            });
+        }
     }
 
-    private toHttpException(exception: DatabaseError | KyselyError){
+    private toHttpException(exception: DatabaseError | KyselyError): HttpException{
         switch (exception.code) {
                 case ERROR_KEYS.DATABASE_UNAVAILABLE:
                     return DatabaseUnavailableException;

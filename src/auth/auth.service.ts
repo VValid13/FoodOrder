@@ -22,10 +22,7 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string) {
-    const user = await this.userService.getUserByUsername(username);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials.');
-    }
+    const user = await this.userService.getUserByUsernameOrUnauthorized(username);
     const passwordStatus = await this.encryptionService.compare(password, user.passwordHash);
     if (!passwordStatus) throw new UnauthorizedException('INVALID CREDENTIALS');
 
