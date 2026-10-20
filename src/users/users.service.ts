@@ -6,6 +6,7 @@ import { UserMapper } from './users.mapper.js';
 import { UserEntity } from './users.entity.js';
 import { GetUserDto } from './_utils/dtos/responses/get-user.dto.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
+import {createHash} from "node:crypto";
 
 @Injectable()
 export class UsersService {
@@ -14,6 +15,9 @@ export class UsersService {
     private readonly userMapper: UserMapper,
     private readonly encryptionService: EncryptionService,
   ) {}
+  // /!\ TO DELETE: DIPLICATE IN AUTH_SERVICE
+  private hashRefreshToken = (rawToken: string) =>
+      createHash('sha256').update(rawToken).digest('hex');
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
     const newUserEntity: UserEntity = this.userMapper.toNewEntity(
@@ -25,6 +29,16 @@ export class UsersService {
   }
   async getUserById(id: UUID) {
     return await this.userRepository.findById(id);
+  }
+  async getSelfUserByToken(token: string) {
+    try {
+      return await this.userRepository.findById
+      (
+          await this.userRepository.findUseridByValidTokenHash(this.hashRefreshToken(token))
+      )
+    }catch {
+      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
+    }
   }
   async getUserByUsername(username: string) {
     return await this.userRepository.findOneByUsername(this.userMapper.formatUsername(username));

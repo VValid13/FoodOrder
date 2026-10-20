@@ -1,9 +1,11 @@
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Param } from '@nestjs/common';
+import {Controller, Get, Param, Req, Res, UnauthorizedException} from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import * as crypto from 'crypto';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import { UserMapper } from './users.mapper.js';
+import type {Request} from "express";
+import {REFRESH_COOKIE} from "../auth/_utils/constants/refresh-token.constants.js";
 
 @ApiTags('Users')
 @Controller('users')
@@ -25,5 +27,16 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user informations from username' })
   async getUserByUsername(@Param('username') username: string) {
     return this.userMapper.toGetUserDto(await this.userService.getUserByUsername(username));
+  }
+
+  @Protect()
+  @Get('/me')
+  @ApiOperation({ summary: 'Get user informations from me'})
+  async getMe(@Req() req: Request) {
+    const token: string | undefined = req.cookies?.[REFRESH_COOKIE];
+    if(!token) {throw new UnauthorizedException('INVALID_REFRESH_TOKEN');}
+    return this.userMapper.toGetUserDto(
+      await this.userService.getSelfUserByToken(token)
+    );
   }
 }

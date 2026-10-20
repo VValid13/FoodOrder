@@ -16,7 +16,15 @@ export class UsersRepository {
       .where('id', '=', id)
       .executeTakeFirstOrThrow();
   }
-
+  async findUseridByValidTokenHash(tokenHash: string): Promise<UUID> {
+    const refreshToken = await this.db
+        .selectFrom('token')
+        .selectAll()
+        .where('tokenHash','=', tokenHash)
+        .where('isActive','=',true)
+        .executeTakeFirstOrThrow();
+    return refreshToken.userId;
+  }
   async createUser(userInfos: UserEntity) {
     return await this.db
       .insertInto('user')
