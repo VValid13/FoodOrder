@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables } from '../_utils/config/env.config.js';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, UUID } from 'node:crypto';
 import dayjs from 'dayjs';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { UserEntity } from '../users/users.entity.js';
@@ -22,10 +22,7 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string) {
-    const user = await this.userService.getUserByUsername(username);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials.');
-    }
+    const user = await this.userService.getUserByUsernameOrUnauthorized(username);
     const passwordStatus = await this.encryptionService.compare(password, user.passwordHash);
     if (!passwordStatus) throw new UnauthorizedException('INVALID CREDENTIALS');
 
@@ -52,22 +49,22 @@ export class AuthService {
   }
 
   async refreshTokens(rawToken: string) {
-    const refreshSchema = await this.refreshTokenRepository.findIdByValidTokenHash(
-      this.hashRefreshToken(rawToken),
-    );
-    if (!refreshSchema) {
+    try {
+      const refreshSchema = await this.refreshTokenRepository.findIdByValidTokenHash(
+        this.hashRefreshToken(rawToken),
+      );
+      await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
+      const user = await this.userService.getUserById(refreshSchema.userId);
+      return this.generateToken(user);
+    } catch {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
-    await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
-    const user = await this.userService.getUserById(refreshSchema.userId);
-    if (!user) {
-      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
-    }
-
-    return this.generateToken(user);
+  }
+  async invalidateRefreshByUserID(userId: UUID) {
+    await this.refreshTokenRepository.revokeByUserId(userId);
   }
 
-  logout(rawToken: string) {
-    return this.refreshTokenRepository.revokeByTokenHash(this.hashRefreshToken(rawToken));
+  async logout(rawToken: string) {
+    return await this.refreshTokenRepository.revokeByTokenHash(this.hashRefreshToken(rawToken));
   }
 }

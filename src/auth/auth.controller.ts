@@ -33,6 +33,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user' })
   async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
     const user = await this.authService.validateUser(body.username, body.password);
+    await this.authService.invalidateRefreshByUserID(user.id);
     const { accessToken, refreshToken, refreshTokenExpireAt } =
       await this.authService.generateToken(user);
     res.cookie(REFRESH_COOKIE, refreshToken, {
