@@ -46,6 +46,9 @@ export class EnvironmentVariables {
 
   @IsNotEmptyString()
   S3_BUCKET: string;
+
+  @IsUrl({ require_tld: false, require_protocol: true })
+  PLACES_API_URL: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

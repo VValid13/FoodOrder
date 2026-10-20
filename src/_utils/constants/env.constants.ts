@@ -12,6 +12,7 @@ export const ENV_KEYS = {
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
   S3_SECRET_KEY: 'S3_SECRET_KEY',
   S3_BUCKET: 'S3_BUCKET',
+  PLACES_API_URL: 'PLACES_API_URL',
 } as const satisfies Record<string, keyof EnvironmentVariables>;
 
 export type EnvType = ValueOf<typeof ENV_KEYS>;
