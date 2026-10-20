@@ -6,7 +6,7 @@ import { UserMapper } from './users.mapper.js';
 import { UserEntity } from './users.entity.js';
 import { GetUserDto } from './_utils/dtos/responses/get-user.dto.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
-import { KyselyError } from '../_utils/filters/postgresExceptionFilter.js';
+import { KyselyError } from '../_utils/filters/postgres-exception-filter.js';
 import { ERROR_KEYS } from '../_utils/constants/error-code.constants.js';
 
 @Injectable()
