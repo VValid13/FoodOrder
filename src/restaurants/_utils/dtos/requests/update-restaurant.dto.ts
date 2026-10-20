@@ -10,9 +10,9 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { Optional } from 'class-validator-extended';
 import type { UUID } from 'node:crypto';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
-import { IsOptionalNotNull } from '../../../../_utils/decorators/is-optional-not-null.decorator.js';
 import {
   COORDINATES_EXAMPLE,
   COORDINATES_PATTERN,
@@ -26,7 +26,7 @@ import { OpeningHourDto } from './opening-hour.dto.js';
 
 export class UpdateRestaurantDto {
   @ApiPropertyOptional({ example: 'Chez Mario', maxLength: RESTAURANT_NAME_MAX_LENGTH })
-  @IsOptionalNotNull()
+  @Optional()
   @IsNotEmptyString()
   @MaxLength(RESTAURANT_NAME_MAX_LENGTH)
   name?: string;
@@ -35,7 +35,7 @@ export class UpdateRestaurantDto {
     example: '12 rue des Archives, 75004 Paris',
     maxLength: RESTAURANT_ADDRESS_MAX_LENGTH,
   })
-  @IsOptionalNotNull()
+  @Optional()
   @IsNotEmptyString()
   @MaxLength(RESTAURANT_ADDRESS_MAX_LENGTH)
   address?: string;
@@ -57,7 +57,7 @@ export class UpdateRestaurantDto {
   coordinates?: string | null;
 
   @ApiPropertyOptional({ example: RESTAURANT_DEFAULT_TIMEZONE })
-  @IsOptionalNotNull()
+  @Optional()
   @IsTimeZone()
   timezone?: string;
 
@@ -71,7 +71,7 @@ export class UpdateRestaurantDto {
     maxItems: RESTAURANT_MAX_OPENING_HOURS,
     description: 'Replaces every opening hour of the restaurant',
   })
-  @IsOptionalNotNull()
+  @Optional()
   @IsArray()
   @ArrayMaxSize(RESTAURANT_MAX_OPENING_HOURS)
   @ValidateNested({ each: true })
