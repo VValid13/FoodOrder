@@ -4,6 +4,7 @@ import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserEntity } from './users.entity.js';
+import {RefreshTokenEntity} from "../auth/entity/refresh-token.entity.js";
 
 @Injectable()
 export class UsersRepository {
@@ -17,12 +18,13 @@ export class UsersRepository {
       .executeTakeFirstOrThrow();
   }
   async findUseridByValidTokenHash(tokenHash: string): Promise<UUID> {
-    const refreshToken = await this.db
+    const refreshToken: RefreshTokenEntity = await this.db
         .selectFrom('token')
         .selectAll()
         .where('tokenHash','=', tokenHash)
         .where('isActive','=',true)
         .executeTakeFirstOrThrow();
+    console.log(refreshToken);
     return refreshToken.userId;
   }
   async createUser(userInfos: UserEntity) {
@@ -50,5 +52,17 @@ export class UsersRepository {
       })
       .where('id', '=', id)
       .executeTakeFirstOrThrow();
+  }
+
+  async updateUsername(userId: UUID, newUsername: string) {
+    console.log('access to db');
+    return await this.db
+        .updateTable('user')
+        .set({
+          username: newUsername,
+          updatedAt: new Date(),
+        })
+        .where('id','=',userId)
+        .executeTakeFirstOrThrow();
   }
 }

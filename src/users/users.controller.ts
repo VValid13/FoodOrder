@@ -1,5 +1,5 @@
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import {Controller, Get, Param, Req, Res, UnauthorizedException} from '@nestjs/common';
+import {Controller, Get, Param, Post, Req, Res, UnauthorizedException} from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import * as crypto from 'crypto';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
@@ -38,5 +38,14 @@ export class UsersController {
     return this.userMapper.toGetUserDto(
       await this.userService.getSelfUserByToken(token)
     );
+  }
+  @Protect()
+  @Post('/me/:newUsername')
+  @ApiParam({ type: 'string', name: 'newUsername' })
+  @ApiOperation({ summary: 'Get user informations from me'})
+  async updateMe(@Req() req: Request,@Param('newUsername') newUsername: string) {
+    const token: string | undefined = req.cookies?.[REFRESH_COOKIE];
+    if(!token) {throw new UnauthorizedException('INVALID_REFRESH_TOKEN');}
+    return await this.userService.updateSelfUsernameByToken(token,newUsername)
   }
 }

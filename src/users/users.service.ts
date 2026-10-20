@@ -51,4 +51,18 @@ export class UsersService {
     }
   }
   getUser = (user: UserEntity): GetUserDto => this.userMapper.toGetUserDto(user);
+
+  async updateSelfUsernameByToken(token: string, newUsername: string) {
+    try {
+      console.log('in try');
+      return await this.userRepository.updateUsername
+      (
+          await this.userRepository.findUseridByValidTokenHash(this.hashRefreshToken(token)),
+          newUsername
+      )
+    }catch (err){
+      console.log('catch updateUser Service')
+      throw new UnauthorizedException(err);
+    }
+  }
 }
