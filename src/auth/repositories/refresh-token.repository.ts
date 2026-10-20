@@ -33,7 +33,7 @@ export class RefreshTokenRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async findIdByValidTokenHash(tokenHash: string): Promise<RefreshTokenEntity | undefined> {
+  async findIdByValidTokenHash(tokenHash: string): Promise<RefreshTokenEntity> {
     return await this.db
       .selectFrom('token')
       .selectAll()

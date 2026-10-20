@@ -49,19 +49,18 @@ export class AuthService {
   }
 
   async refreshTokens(rawToken: string) {
-    const refreshSchema = await this.refreshTokenRepository.findIdByValidTokenHash(
-      this.hashRefreshToken(rawToken),
-    );
-    if (!refreshSchema) {
-      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
-    }
-    await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
-    const user = await this.userService.getUserById(refreshSchema.userId);
-    if (!user) {
-      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
-    }
 
-    return this.generateToken(user);
+    try{
+      const refreshSchema = await this.refreshTokenRepository.findIdByValidTokenHash(
+          this.hashRefreshToken(rawToken),
+      );
+      await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
+      const user = await this.userService.getUserById(refreshSchema.userId);
+      return this.generateToken(user);
+    }
+    catch (_err) {
+      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
+    }
   }
 
   logout(rawToken: string) {

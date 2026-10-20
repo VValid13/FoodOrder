@@ -2,7 +2,7 @@ import {
     ArgumentsHost,
     Catch,
     ExceptionFilter, HttpException, HttpStatus,
-    InternalServerErrorException, NotFoundException,
+    InternalServerErrorException,
 } from "@nestjs/common";
 import {DatabaseError} from "pg";
 import {ERROR_KEYS} from "../constants/error-code.constants.js";
@@ -11,11 +11,9 @@ import {
     DatabaseUnavailableException,
     EntityNotFoundException,
     ForeignKeyException,
-    UsernameUnavailableExceptions, UUIDFormatException
+    conflictException, UUIDFormatException
 } from "../.exception.js";
 import {NoResultError} from "kysely";
-import {inspect} from "node:util";
-import {isInstance} from "class-validator";
 export class KyselyError extends Error{
     constructor(code: string, message: string) {
         super();
@@ -27,7 +25,7 @@ export class KyselyError extends Error{
 }
 @Catch()
 export class PostgresExeptionFilter implements ExceptionFilter{
-    catch(exception: any, host: ArgumentsHost): any {
+    catch(exception: any, host: ArgumentsHost): unknown {
         if(exception && typeof exception.code === 'string' && exception.code.length === 5){
             const httpException = this.toHttpException(exception);
             const response = host.switchToHttp().getResponse<Response>();
@@ -64,7 +62,7 @@ export class PostgresExeptionFilter implements ExceptionFilter{
                 case ERROR_KEYS.DATABASE_UNAVAILABLE:
                     return DatabaseUnavailableException;
                 case ERROR_KEYS.UNIQUE_VIOLATION:
-                    return UsernameUnavailableExceptions;
+                    return conflictException;
                 case ERROR_KEYS.FOREIGN_KEY_VIOLATION:
                     return ForeignKeyException;
                 case ERROR_KEYS.UUID_FORMAT_VIOLATION:

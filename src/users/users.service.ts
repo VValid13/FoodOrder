@@ -1,4 +1,4 @@
-import {HttpException, HttpStatus, Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
 import { CreateUserDto } from './_utils/dtos/requests/create-user.dto.js';
 import { UUID } from 'crypto';
 import { UsersRepository } from './users.repository.js';
@@ -41,8 +41,8 @@ export class UsersService {
   async getUserByUsernameOrUnauthorized(username: string) {
     try{
       return await this.userRepository.findOneByUsername(username);
-    }catch (err){
-      console.log(err)
+    }catch (_err){
+      //console.log(err)
       throw new UnauthorizedException('INVALID CREDENTIALS')
     }
   }
