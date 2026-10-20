@@ -17,21 +17,14 @@ import {
   UUIDFormatException,
 } from '../global.exception.js';
 import { NoResultError } from 'kysely';
-export class KyselyError extends Error {
-  constructor(code: string, message: string) {
-    super();
-    this.code = code;
-    this.message = message;
-  }
-  code: string;
-  message: string;
-}
+import { KyselyError } from '../kysely.error.js';
+
 @Catch()
 export class PostgresExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost): unknown {
+    const response = host.switchToHttp().getResponse<Response>();
     if (exception && typeof exception.code === 'string' && exception.code.length === 5) {
       const httpException = this.toHttpException(exception);
-      const response = host.switchToHttp().getResponse<Response>();
       response.status(httpException.getStatus()).json({
         statusCode: httpException.errorCode,
         code: exception.code,
@@ -39,7 +32,6 @@ export class PostgresExceptionFilter implements ExceptionFilter {
       });
     } else if (exception instanceof NoResultError) {
       const status = HttpStatus.NOT_FOUND;
-      const response = host.switchToHttp().getResponse<Response>();
       return response.status(status).json({
         statusCode: status,
         code: ERROR_KEYS.NO_RESULT_ERROR,
@@ -47,7 +39,6 @@ export class PostgresExceptionFilter implements ExceptionFilter {
       });
     } else {
       const status = exception.getStatus ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-      const response = host.switchToHttp().getResponse<Response>();
       return response.status(status).json({
         statusCode: status,
         code: exception.code || '500',

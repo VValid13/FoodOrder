@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables } from '../_utils/config/env.config.js';
-import {createHash, randomBytes, UUID} from 'node:crypto';
+import { createHash, randomBytes, UUID } from 'node:crypto';
 import dayjs from 'dayjs';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { UserEntity } from '../users/users.entity.js';
@@ -56,7 +56,7 @@ export class AuthService {
       await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
       const user = await this.userService.getUserById(refreshSchema.userId);
       return this.generateToken(user);
-    } catch (_err) {
+    } catch {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
   }

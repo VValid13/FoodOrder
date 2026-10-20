@@ -1,7 +1,8 @@
 import {
   BadGatewayException,
   BadRequestException,
-  ConflictException, ForbiddenException,
+  ConflictException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 
