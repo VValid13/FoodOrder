@@ -29,15 +29,11 @@ export class UsersService {
     return await this.userRepository.findById(id);
   }
   async getUserByUsername(username: string) {
-    const user = await this.userRepository.findOneByUsername(username);
-    if (!user) {
-      throw new KyselyError(ERROR_KEYS.NO_RESULT_ERROR, 'Username not found for user');
-    }
-    return user;
+    return await this.userRepository.findOneByUsername(this.userMapper.formatUsername(username));
   }
   async getUserByUsernameOrUnauthorized(username: string) {
     try {
-      return await this.userRepository.findOneByUsername(username);
+      return await this.userRepository.findOneByUsername(this.userMapper.formatUsername(username));
     } catch (_err) {
       throw new UnauthorizedException('INVALID CREDENTIALS');
     }
