@@ -20,7 +20,7 @@ import {
   RESTAURANT_PHONE_MAX_LENGTH,
 } from '../../constants/restaurants.constants.js';
 import { CoordinatesDto } from './coordinates.dto.js';
-import { OpeningHourDto } from './opening-hour.dto.js';
+import { OpeningDayDto } from './opening-day.dto.js';
 
 export class CreateRestaurantDto {
   @ApiProperty({ example: 'Chez Mario', maxLength: RESTAURANT_NAME_MAX_LENGTH })
@@ -66,11 +66,11 @@ export class CreateRestaurantDto {
   @IsUUID()
   menuId?: UUID | null;
 
-  @ApiPropertyOptional({ type: [OpeningHourDto], maxItems: RESTAURANT_MAX_OPENING_HOURS })
+  @ApiPropertyOptional({ type: [OpeningDayDto], maxItems: RESTAURANT_MAX_OPENING_HOURS })
   @Optional()
   @IsArray()
   @ArrayMaxSize(RESTAURANT_MAX_OPENING_HOURS)
   @ValidateNested({ each: true })
-  @Type(() => OpeningHourDto)
-  openingHours?: OpeningHourDto[];
+  @Type(() => OpeningDayDto)
+  openingHours?: OpeningDayDto[];
 }

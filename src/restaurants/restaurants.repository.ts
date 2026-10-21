@@ -5,7 +5,7 @@ import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import type { UUID } from 'node:crypto';
 import { DAYS_OF_WEEK } from '../_utils/constants/day-of-week.constants.js';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
-import type { OpeningHour } from '../_utils/types/opening-hour.type.js';
+import type { OpeningDay } from '../_utils/types/opening-day.type.js';
 import type { DatabaseTables } from '../database/database.types.js';
 import type { NewRestaurant } from './_utils/types/new-restaurant.type.js';
 import type { RestaurantDetails } from './_utils/types/restaurant-details.type.js';
@@ -75,7 +75,7 @@ export class RestaurantsRepository {
   async updateRestaurant(
     restaurantId: UUID,
     changes: RestaurantChanges,
-    openingHours: OpeningHour[] | undefined,
+    openingHours: OpeningDay[] | undefined,
   ): Promise<void> {
     await this.db.transaction().execute(async (trx) => {
       await trx
@@ -128,7 +128,7 @@ export class RestaurantsRepository {
   private async insertOpeningHours(
     trx: Transaction<DatabaseTables>,
     restaurantId: UUID,
-    openingHours: OpeningHour[],
+    openingHours: OpeningDay[],
   ): Promise<void> {
     if (openingHours.length === 0) {
       return;

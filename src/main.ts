@@ -5,7 +5,11 @@ import { ENV_KEYS } from './_utils/constants/env.constants.js';
 import { AppModule } from './app.module.js';
 import { configureApp } from './app.setup.js';
 import cookieParser from 'cookie-parser';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import { PostgresExceptionFilter } from './_utils/filters/postgres-exception-filter.js';
+
+dayjs.extend(customParseFormat);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

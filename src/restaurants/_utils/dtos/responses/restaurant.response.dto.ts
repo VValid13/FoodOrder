@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import type { UUID } from 'node:crypto';
 import { CoordinatesResponseDto } from '../../../../_utils/dtos/responses/coordinates.response.dto.js';
-import { OpeningHourResponseDto } from '../../../../_utils/dtos/responses/opening-hour.response.dto.js';
+import { OpeningDayResponseDto } from '../../../../_utils/dtos/responses/opening-day.response.dto.js';
 import { RESTAURANT_DEFAULT_TIMEZONE } from '../../constants/restaurants.constants.js';
 import { MenuSummaryResponseDto } from './menu-summary.response.dto.js';
 
@@ -30,8 +30,8 @@ export class RestaurantResponseDto {
   @ApiProperty({ type: MenuSummaryResponseDto, nullable: true })
   menu: MenuSummaryResponseDto | null;
 
-  @ApiProperty({ type: [OpeningHourResponseDto] })
-  openingHours: OpeningHourResponseDto[];
+  @ApiProperty({ type: [OpeningDayResponseDto] })
+  openingHours: OpeningDayResponseDto[];
 
   @ApiProperty()
   createdAt: Date;

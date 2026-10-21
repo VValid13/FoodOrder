@@ -10,19 +10,21 @@ import {
   TIME_FORMAT_MESSAGE,
   TIME_PATTERN,
 } from '../../../../_utils/constants/time.constants.js';
+import type { Time } from '../../../../_utils/types/time.type.js';
 import { IsAfterOrBefore } from '../../../../_utils/validators/is-after-or-before.validator.js';
 
-export class OpeningHourDto {
+export class OpeningDayDto {
   @ApiProperty({ enum: DAYS_OF_WEEK, example: 'monday' })
   @IsIn(DAYS_OF_WEEK, { message: DAY_OF_WEEK_MESSAGE })
   day: DayOfWeek;
 
-  @ApiProperty({ example: '11:30', pattern: TIME_PATTERN.source })
+  @ApiProperty({ type: String, example: '11:30', pattern: TIME_PATTERN.source })
   @Matches(TIME_PATTERN, { message: TIME_FORMAT_MESSAGE })
-  open: string;
+  @IsAfterOrBefore('close', TIME_COMPARISONS.BEFORE)
+  open: Time;
 
-  @ApiProperty({ example: '14:30', pattern: TIME_PATTERN.source })
+  @ApiProperty({ type: String, example: '14:30', pattern: TIME_PATTERN.source })
   @Matches(TIME_PATTERN, { message: TIME_FORMAT_MESSAGE })
   @IsAfterOrBefore('open', TIME_COMPARISONS.AFTER)
-  close: string;
+  close: Time;
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DAYS_OF_WEEK } from '../../../_utils/constants/day-of-week.constants.js';
-import { DATABASE_TIME_FORMAT, TIME_FORMAT } from '../../../_utils/constants/time.constants.js';
-import { parseTime } from '../../../_utils/helpers/parse-time.helper.js';
+import { DATABASE_TIME_FORMAT, END_OF_DAY } from '../../../_utils/constants/time.constants.js';
+import { formatTime, parseTime } from '../../../_utils/helpers/parse-time.helper.js';
+import type { Time } from '../../../_utils/types/time.type.js';
 import type { CreateRestaurantDto } from '../dtos/requests/create-restaurant.dto.js';
 import type { UpdateRestaurantDto } from '../dtos/requests/update-restaurant.dto.js';
 import type { RestaurantResponseDto } from '../dtos/responses/restaurant.response.dto.js';
@@ -66,7 +67,8 @@ export class RestaurantMapper {
   toResponseList = (restaurants: RestaurantDetails[]): RestaurantResponseDto[] =>
     restaurants.map((restaurant) => this.toResponse(restaurant));
 
-  private toTime(databaseTime: string): string {
-    return parseTime(databaseTime, DATABASE_TIME_FORMAT)?.format(TIME_FORMAT) ?? databaseTime;
+  private toTime(databaseTime: string): Time {
+    const time = parseTime(databaseTime, DATABASE_TIME_FORMAT);
+    return time ? formatTime(time) : END_OF_DAY;
   }
 }

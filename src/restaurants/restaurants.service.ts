@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { UUID } from 'node:crypto';
+import { PlacesService } from '../places/places.service.js';
 import type { CreateRestaurantDto } from './_utils/dtos/requests/create-restaurant.dto.js';
+import type { FindRestaurantsDto } from './_utils/dtos/requests/find-restaurants.dto.js';
 import type { UpdateRestaurantDto } from './_utils/dtos/requests/update-restaurant.dto.js';
 import type { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.response.dto.js';
 import { RestaurantMapper } from './_utils/mappers/restaurant.mapper.js';
@@ -13,6 +15,7 @@ export class RestaurantsService {
   constructor(
     private readonly restaurantsRepository: RestaurantsRepository,
     private readonly restaurantMapper: RestaurantMapper,
+    private readonly placesService: PlacesService,
   ) {}
 
   async createRestaurant(createRestaurantDto: CreateRestaurantDto): Promise<RestaurantResponseDto> {
@@ -22,21 +25,30 @@ export class RestaurantsService {
     return await this.findResponseById(restaurantId);
   }
 
-  async findAllRestaurants(): Promise<RestaurantResponseDto[]> {
-    const restaurants = await this.restaurantsRepository.findAllRestaurants();
-    return this.restaurantMapper.toResponseList(restaurants);
+  async findRestaurants({ name, lat, lon }: FindRestaurantsDto): Promise<RestaurantResponseDto[]> {
+    if (!name) {
+      return this.restaurantMapper.toResponseList(
+        await this.restaurantsRepository.findAllRestaurants(),
+      );
+    }
+
+    const knownRestaurants = await this.restaurantsRepository.findRestaurantsByName(name);
+    if (knownRestaurants.length > 0 || lat === undefined || lon === undefined) {
+      return this.restaurantMapper.toResponseList(knownRestaurants);
+    }
+
+    return await this.importRestaurants(
+      await this.placesService.searchAround(name, { latitude: lat, longitude: lon }),
+    );
   }
 
   findRestaurant(restaurant: RestaurantDetails): RestaurantResponseDto {
     return this.restaurantMapper.toResponse(restaurant);
   }
 
-  async findRestaurantsByName(name: string): Promise<RestaurantResponseDto[]> {
-    const restaurants = await this.restaurantsRepository.findRestaurantsByName(name);
-    return this.restaurantMapper.toResponseList(restaurants);
-  }
-
-  async importRestaurants(newRestaurants: NewRestaurant[]): Promise<RestaurantResponseDto[]> {
+  private async importRestaurants(
+    newRestaurants: NewRestaurant[],
+  ): Promise<RestaurantResponseDto[]> {
     await this.restaurantsRepository.importRestaurants(newRestaurants);
     const externalIds = newRestaurants
       .map(({ values }) => values.externalId)

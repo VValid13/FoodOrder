@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import type { Coordinates } from '../../../_utils/types/coordinates.type.js';
+import type { OpeningDay } from '../../../_utils/types/opening-day.type.js';
 import { RESTAURANT_UNKNOWN_ADDRESS } from '../../../restaurants/_utils/constants/restaurants.constants.js';
 import type { NewRestaurant } from '../../../restaurants/_utils/types/new-restaurant.type.js';
 import type { OverpassElement } from '../types/overpass-element.type.js';
-import { OpeningHoursMapper } from './opening-hours.mapper.js';
 
 @Injectable()
 export class PlaceMapper {
-  constructor(private readonly openingHoursMapper: OpeningHoursMapper) {}
-
-  toNewRestaurant(element: OverpassElement): NewRestaurant {
+  toNewRestaurant(element: OverpassElement, openingHours: OpeningDay[]): NewRestaurant {
     const tags = element.tags ?? {};
     const coordinates = this.toCoordinates(element);
 
@@ -22,11 +20,11 @@ export class PlaceMapper {
         longitude: coordinates?.longitude ?? null,
         externalId: `${element.type}/${element.id}`,
       },
-      openingHours: this.openingHoursMapper.toOpeningHours(tags.opening_hours, coordinates),
+      openingHours,
     };
   }
 
-  private toCoordinates(element: OverpassElement): Coordinates | null {
+  toCoordinates(element: OverpassElement): Coordinates | null {
     const latitude = element.lat ?? element.center?.lat;
     const longitude = element.lon ?? element.center?.lon;
     return latitude !== undefined && longitude !== undefined ? { latitude, longitude } : null;

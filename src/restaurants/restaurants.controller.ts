@@ -8,8 +8,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
+  ApiBadGatewayResponse,
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -27,7 +29,9 @@ import {
   RESTAURANTS_ROUTE,
   RESTAURANTS_TAG,
 } from './_utils/constants/restaurants.constants.js';
+import { PLACES_UNAVAILABLE_MESSAGE } from '../places/_utils/exceptions/places.exceptions.js';
 import { CreateRestaurantDto } from './_utils/dtos/requests/create-restaurant.dto.js';
+import { FindRestaurantsDto } from './_utils/dtos/requests/find-restaurants.dto.js';
 import { UpdateRestaurantDto } from './_utils/dtos/requests/update-restaurant.dto.js';
 import { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.response.dto.js';
 import { ParseRestaurantPipe } from './_utils/pipes/parse-restaurant.pipe.js';
@@ -53,10 +57,17 @@ export class RestaurantsController {
 
   @Protect()
   @Get()
-  @ApiOperation({ summary: 'List restaurants' })
+  @ApiOperation({
+    summary:
+      'List restaurants, or search by name then on OpenStreetMap around lat/lon if none is known',
+  })
   @ApiOkResponse({ type: [RestaurantResponseDto] })
-  async findAllRestaurants(): Promise<RestaurantResponseDto[]> {
-    return await this.restaurantsService.findAllRestaurants();
+  @ApiBadRequestResponse({ description: 'Invalid name, lat or lon' })
+  @ApiBadGatewayResponse({ description: PLACES_UNAVAILABLE_MESSAGE })
+  async findRestaurants(
+    @Query() findRestaurantsDto: FindRestaurantsDto,
+  ): Promise<RestaurantResponseDto[]> {
+    return await this.restaurantsService.findRestaurants(findRestaurantsDto);
   }
 
   @Protect()

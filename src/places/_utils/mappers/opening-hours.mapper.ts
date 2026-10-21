@@ -3,9 +3,10 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import OpeningHours from 'opening_hours';
 import { DAYS_OF_WEEK } from '../../../_utils/constants/day-of-week.constants.js';
-import { END_OF_DAY, TIME_FORMAT } from '../../../_utils/constants/time.constants.js';
+import { END_OF_DAY } from '../../../_utils/constants/time.constants.js';
+import { formatTime } from '../../../_utils/helpers/parse-time.helper.js';
 import type { Coordinates } from '../../../_utils/types/coordinates.type.js';
-import type { OpeningHour } from '../../../_utils/types/opening-hour.type.js';
+import type { OpeningDay } from '../../../_utils/types/opening-day.type.js';
 import {
   DAYS_PER_WEEK,
   OPENING_HOURS_COUNTRY_CODE,
@@ -16,7 +17,7 @@ import {
 
 @Injectable()
 export class OpeningHoursMapper {
-  toOpeningHours(value: string | undefined, coordinates: Coordinates | null): OpeningHour[] {
+  toOpeningDays(value: string | undefined, coordinates: Coordinates | null): OpeningDay[] {
     if (!value || OPENING_HOURS_VARIABLE_TIMES_PATTERN.test(value)) {
       return [];
     }
@@ -47,7 +48,7 @@ export class OpeningHoursMapper {
     }
   }
 
-  private toWeeklySlots(openingHours: OpeningHours, weekStart: Dayjs): OpeningHour[] {
+  private toWeeklySlots(openingHours: OpeningHours, weekStart: Dayjs): OpeningDay[] {
     const weekEnd = weekStart.add(DAYS_PER_WEEK, 'day');
     return openingHours
       .getOpenIntervals(weekStart.toDate(), weekEnd.toDate())
@@ -59,14 +60,14 @@ export class OpeningHoursMapper {
       );
   }
 
-  private splitByDay(from: Dayjs, to: Dayjs): OpeningHour[] {
-    const slots: OpeningHour[] = [];
+  private splitByDay(from: Dayjs, to: Dayjs): OpeningDay[] {
+    const slots: OpeningDay[] = [];
     let start = from;
     while (start.isBefore(to)) {
       const nextMidnight = start.startOf('day').add(1, 'day');
       const end = to.isBefore(nextMidnight) ? to : nextMidnight;
-      const open = start.format(TIME_FORMAT);
-      const close = end.isSame(nextMidnight) ? END_OF_DAY : end.format(TIME_FORMAT);
+      const open = formatTime(start);
+      const close = end.isSame(nextMidnight) ? END_OF_DAY : formatTime(end);
       if (open < close) {
         slots.push({ day: DAYS_OF_WEEK[start.day()], open, close });
       }

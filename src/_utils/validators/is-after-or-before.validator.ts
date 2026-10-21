@@ -21,7 +21,8 @@ export function IsAfterOrBefore(
       },
       validator: {
         validate(value: unknown, args: ValidationArguments): boolean {
-          const [relatedProperty, wantedComparison] = args.constraints as [string, TimeComparison];
+          const relatedProperty: string = args.constraints[0];
+          const wantedComparison: TimeComparison = args.constraints[1];
           const relatedValue = (args.object as Record<string, unknown>)[relatedProperty];
           if (typeof value !== 'string' || typeof relatedValue !== 'string') {
             return false;

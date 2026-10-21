@@ -1,1 +1,1 @@
-export type ValueOf<T> = T[keyof T];
+export type ValueOf<T> = T extends readonly (infer U)[] ? U : T[keyof T];
