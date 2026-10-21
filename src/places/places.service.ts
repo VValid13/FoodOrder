@@ -1,35 +1,50 @@
-import { Injectable } from '@nestjs/common';
-import type { PlaceResponseDto } from './_utils/dtos/responses/place.response.dto.js';
+import { Injectable, Logger } from '@nestjs/common';
+import { isAxiosError } from 'axios';
+import type { RestaurantResponseDto } from '../restaurants/_utils/dtos/responses/restaurant.response.dto.js';
+import { RestaurantsService } from '../restaurants/restaurants.service.js';
+import { PLACES_LOGGER_CONTEXT } from './_utils/constants/places.constants.js';
+import type { SearchPlacesDto } from './_utils/dtos/requests/search-places.dto.js';
 import { PlacesExceptions } from './_utils/exceptions/places.exceptions.js';
-import {
-  buildLookupQuery,
-  buildSearchQuery,
-} from './_utils/helpers/build-overpass-query.helper.js';
+import { OverpassQueryMapper } from './_utils/mappers/overpass-query.mapper.js';
 import { PlaceMapper } from './_utils/mappers/place.mapper.js';
-import type { Place } from './_utils/types/place.type.js';
-import type { SearchAround } from './_utils/types/search-around.type.js';
-import { PlacesClient } from './places.client.js';
+import type { OverpassElement } from './_utils/types/overpass-element.type.js';
+import { PlacesRequests } from './places.requests.js';
 
 @Injectable()
 export class PlacesService {
+  private readonly logger = new Logger(PLACES_LOGGER_CONTEXT);
+
   constructor(
-    private readonly placesClient: PlacesClient,
+    private readonly placesRequests: PlacesRequests,
     private readonly placeMapper: PlaceMapper,
+    private readonly overpassQueryMapper: OverpassQueryMapper,
     private readonly placesExceptions: PlacesExceptions,
+    private readonly restaurantsService: RestaurantsService,
   ) {}
 
-  async searchAround(searchAround: SearchAround): Promise<PlaceResponseDto[]> {
-    const elements = await this.placesClient.query(buildSearchQuery(searchAround));
-    return this.placeMapper.toResponseList(
-      elements.map((element) => this.placeMapper.toPlace(element)),
+  async searchPlaces({ name, lat, lon }: SearchPlacesDto): Promise<RestaurantResponseDto[]> {
+    const knownRestaurants = await this.restaurantsService.findRestaurantsByName(name);
+    if (knownRestaurants.length > 0 || lat === undefined || lon === undefined) {
+      return knownRestaurants;
+    }
+
+    const elements = await this.findOnOverpass(
+      this.overpassQueryMapper.toSearchQuery(name, { latitude: lat, longitude: lon }),
+    );
+    return await this.restaurantsService.importRestaurants(
+      elements.map((element) => this.placeMapper.toNewRestaurant(element)),
     );
   }
 
-  async findByExternalIdOrFail(externalId: string): Promise<Place> {
-    const [element] = await this.placesClient.query(buildLookupQuery(externalId));
-    if (!element?.tags?.name) {
-      throw this.placesExceptions.placeNotFound(externalId);
+  private async findOnOverpass(query: string): Promise<OverpassElement[]> {
+    try {
+      return await this.placesRequests.runQuery(query);
+    } catch (error) {
+      if (!isAxiosError(error)) {
+        throw error;
+      }
+      this.logger.warn(`Places provider failed: ${error.response?.status ?? error.code}`);
+      throw this.placesExceptions.unavailable;
     }
-    return this.placeMapper.toPlace(element);
   }
 }

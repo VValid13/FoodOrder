@@ -6,21 +6,20 @@ import {
   IsOptional,
   IsTimeZone,
   IsUUID,
-  Matches,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { Optional } from 'class-validator-extended';
 import type { UUID } from 'node:crypto';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
 import {
-  COORDINATES_EXAMPLE,
-  COORDINATES_PATTERN,
   RESTAURANT_ADDRESS_MAX_LENGTH,
   RESTAURANT_DEFAULT_TIMEZONE,
   RESTAURANT_MAX_OPENING_HOURS,
   RESTAURANT_NAME_MAX_LENGTH,
   RESTAURANT_PHONE_MAX_LENGTH,
 } from '../../constants/restaurants.constants.js';
+import { CoordinatesDto } from './coordinates.dto.js';
 import { OpeningHourDto } from './opening-hour.dto.js';
 
 export class CreateRestaurantDto {
@@ -37,32 +36,38 @@ export class CreateRestaurantDto {
   @MaxLength(RESTAURANT_ADDRESS_MAX_LENGTH)
   address: string;
 
-  @ApiPropertyOptional({ example: '+33 1 42 74 08 84', maxLength: RESTAURANT_PHONE_MAX_LENGTH })
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    example: '+33 1 42 74 08 84',
+    maxLength: RESTAURANT_PHONE_MAX_LENGTH,
+  })
   @IsOptional()
   @IsNotEmptyString()
   @MaxLength(RESTAURANT_PHONE_MAX_LENGTH)
-  phone?: string;
+  phone?: string | null;
 
-  @ApiPropertyOptional({ example: COORDINATES_EXAMPLE, pattern: COORDINATES_PATTERN.source })
+  @ApiPropertyOptional({ type: CoordinatesDto, nullable: true })
   @IsOptional()
-  @Matches(COORDINATES_PATTERN, { message: 'coordinates must use the lat,lon format' })
-  coordinates?: string;
+  @ValidateNested()
+  @Type(() => CoordinatesDto)
+  coordinates?: CoordinatesDto | null;
 
   @ApiPropertyOptional({
     example: RESTAURANT_DEFAULT_TIMEZONE,
     default: RESTAURANT_DEFAULT_TIMEZONE,
   })
-  @IsOptional()
+  @Optional()
   @IsTimeZone()
   timezone?: string;
 
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
   @IsOptional()
   @IsUUID()
-  menuId?: UUID;
+  menuId?: UUID | null;
 
   @ApiPropertyOptional({ type: [OpeningHourDto], maxItems: RESTAURANT_MAX_OPENING_HOURS })
-  @IsOptional()
+  @Optional()
   @IsArray()
   @ArrayMaxSize(RESTAURANT_MAX_OPENING_HOURS)
   @ValidateNested({ each: true })

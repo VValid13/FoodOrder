@@ -1,5 +1,7 @@
+import type { DayOfWeek } from '../constants/day-of-week.constants.js';
+
 export type OpeningHour = {
-  day: number;
+  day: DayOfWeek;
   open: string;
   close: string;
 };

@@ -20,3 +20,4 @@ export type EnvType = ValueOf<typeof ENV_KEYS>;
 export const ENV_FILE_PATH = '.env';
 export const MIN_PORT = 1;
 export const MAX_PORT = 65_535;
+export const HTTPS_PROTOCOL = 'https';

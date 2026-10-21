@@ -3,32 +3,23 @@ import { Kysely, sql } from 'kysely';
 import type { Transaction } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
 import type { UUID } from 'node:crypto';
+import { DAYS_OF_WEEK } from '../_utils/constants/day-of-week.constants.js';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
-import type { DatabaseTables } from '../database/database.types.js';
-import { RestaurantsExceptions } from './_utils/exceptions/restaurants.exceptions.js';
 import type { OpeningHour } from '../_utils/types/opening-hour.type.js';
+import type { DatabaseTables } from '../database/database.types.js';
+import type { NewRestaurant } from './_utils/types/new-restaurant.type.js';
 import type { RestaurantDetails } from './_utils/types/restaurant-details.type.js';
-import type {
-  NewRestaurantValues,
-  RestaurantChanges,
-} from './_utils/types/restaurant-values.type.js';
+import type { RestaurantChanges } from './_utils/types/restaurant-values.type.js';
 
 @Injectable()
 export class RestaurantsRepository {
-  constructor(
-    @InjectKysely() private readonly db: Kysely<DatabaseTables>,
-    private readonly restaurantsExceptions: RestaurantsExceptions,
-  ) {}
+  constructor(@InjectKysely() private readonly db: Kysely<DatabaseTables>) {}
 
-  async create(
-    ownerId: UUID,
-    values: NewRestaurantValues,
-    openingHours: OpeningHour[],
-  ): Promise<UUID> {
+  async createRestaurant({ values, openingHours }: NewRestaurant): Promise<UUID> {
     return await this.db.transaction().execute(async (trx) => {
       const { id } = await trx
         .insertInto('restaurant')
-        .values({ ...values, ownerId })
+        .values(values)
         .returning('id')
         .executeTakeFirstOrThrow();
 
@@ -37,49 +28,51 @@ export class RestaurantsRepository {
     });
   }
 
-  async findDetailsByIdOrFail(restaurantId: UUID): Promise<RestaurantDetails> {
-    return await this.selectDetails()
-      .where('restaurant.id', '=', restaurantId)
-      .executeTakeFirstOrThrow(() => this.restaurantsExceptions.restaurantNotFound(restaurantId));
+  async importRestaurants(newRestaurants: NewRestaurant[]): Promise<void> {
+    await this.db.transaction().execute(async (trx) => {
+      for (const { values, openingHours } of newRestaurants) {
+        const inserted = await trx
+          .insertInto('restaurant')
+          .values(values)
+          .onConflict((conflict) => conflict.column('externalId').doNothing())
+          .returning('id')
+          .executeTakeFirst();
+
+        if (inserted) {
+          await this.insertOpeningHours(trx, inserted.id, openingHours);
+        }
+      }
+    });
   }
 
-  async findAllDetailsByOwner(ownerId: UUID): Promise<RestaurantDetails[]> {
+  async findRestaurantByIdOrFail(restaurantId: UUID): Promise<RestaurantDetails> {
     return await this.selectDetails()
-      .where('restaurant.ownerId', '=', ownerId)
-      .orderBy('restaurant.createdAt', 'desc')
+      .where('restaurant.id', '=', restaurantId)
+      .executeTakeFirstOrThrow();
+  }
+
+  async findAllRestaurants(): Promise<RestaurantDetails[]> {
+    return await this.selectDetails().orderBy('restaurant.name').execute();
+  }
+
+  async findRestaurantsByName(name: string): Promise<RestaurantDetails[]> {
+    return await this.selectDetails()
+      .where('restaurant.name', 'ilike', `%${name}%`)
+      .orderBy('restaurant.name')
       .execute();
   }
 
-  async existsByOwnerAndExternalId(ownerId: UUID, externalId: string): Promise<boolean> {
-    const restaurant = await this.db
-      .selectFrom('restaurant')
-      .select('id')
-      .where('ownerId', '=', ownerId)
-      .where('externalId', '=', externalId)
-      .executeTakeFirst();
-    return restaurant !== undefined;
+  async findRestaurantsByExternalIds(externalIds: string[]): Promise<RestaurantDetails[]> {
+    if (externalIds.length === 0) {
+      return [];
+    }
+    return await this.selectDetails()
+      .where('restaurant.externalId', 'in', externalIds)
+      .orderBy('restaurant.name')
+      .execute();
   }
 
-  async menuExists(menuId: UUID): Promise<boolean> {
-    const menu = await this.db
-      .selectFrom('menu')
-      .select('id')
-      .where('id', '=', menuId)
-      .executeTakeFirst();
-    return menu !== undefined;
-  }
-
-  async isUsedBySession(restaurantId: UUID): Promise<boolean> {
-    const session = await this.db
-      .selectFrom('session')
-      .select('id')
-      .where('restaurantId', '=', restaurantId)
-      .limit(1)
-      .executeTakeFirst();
-    return session !== undefined;
-  }
-
-  async update(
+  async updateRestaurant(
     restaurantId: UUID,
     changes: RestaurantChanges,
     openingHours: OpeningHour[] | undefined,
@@ -98,7 +91,7 @@ export class RestaurantsRepository {
     });
   }
 
-  async delete(restaurantId: UUID): Promise<void> {
+  async deleteRestaurant(restaurantId: UUID): Promise<void> {
     await this.db.transaction().execute(async (trx) => {
       await this.deleteOpeningHours(trx, restaurantId);
       await trx.deleteFrom('restaurant').where('id', '=', restaurantId).execute();
@@ -145,7 +138,7 @@ export class RestaurantsRepository {
       .insertInto('openingSlot')
       .values(
         openingHours.map(({ day, open, close }) => ({
-          dayOfWeek: day,
+          dayOfWeek: DAYS_OF_WEEK.indexOf(day),
           opensAt: open,
           closesAt: close,
         })),

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './_utils/dtos/requests/create-user.dto.js';
 import { UUID } from 'crypto';
 import { UsersRepository } from './users.repository.js';
@@ -16,35 +16,25 @@ export class UsersService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
-    const existingUser = await this.userRepository.findOneByUsername(
-      this.userMapper.formatUsername(createUserDto.username),
-    );
-    if (existingUser) {
-      throw new HttpException('username already used', HttpStatus.BAD_REQUEST);
-    }
     const newUserEntity: UserEntity = this.userMapper.toNewEntity(
       createUserDto,
       await this.encryptionService.encrypt(createUserDto.password),
     );
-    const insertResult = this.userRepository.createUser(newUserEntity);
-    if (!insertResult) {
-      throw new HttpException('error while creating user', HttpStatus.NOT_FOUND);
-    }
+    await this.userRepository.createUser(newUserEntity);
     return newUserEntity;
   }
   async getUserById(id: UUID) {
-    const user = await this.userRepository.findById(id);
-    if (!user) {
-      throw new NotFoundException('user not found');
-    }
-    return user;
+    return await this.userRepository.findById(id);
   }
   async getUserByUsername(username: string) {
-    const user = await this.userRepository.findOneByUsername(username);
-    if (!user) {
-      throw new NotFoundException('user not found');
+    return await this.userRepository.findOneByUsername(this.userMapper.formatUsername(username));
+  }
+  async getUserByUsernameOrUnauthorized(username: string) {
+    try {
+      return await this.userRepository.findOneByUsername(this.userMapper.formatUsername(username));
+    } catch {
+      throw new UnauthorizedException('INVALID CREDENTIALS');
     }
-    return user;
   }
   getUser = (user: UserEntity): GetUserDto => this.userMapper.toGetUserDto(user);
 }

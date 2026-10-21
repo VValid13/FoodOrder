@@ -1,7 +1,14 @@
 import type { Insertable, Updateable } from 'kysely';
 import type { Restaurant } from '../../../database/database.types.js';
 
-type ManagedColumns = 'id' | 'ownerId' | 'createdAt' | 'updatedAt';
+type EditableColumns =
+  | 'name'
+  | 'address'
+  | 'phone'
+  | 'latitude'
+  | 'longitude'
+  | 'timezone'
+  | 'menuId';
 
-export type NewRestaurantValues = Omit<Insertable<Restaurant>, ManagedColumns>;
-export type RestaurantChanges = Omit<Updateable<Restaurant>, ManagedColumns | 'externalId'>;
+export type NewRestaurantValues = Pick<Insertable<Restaurant>, EditableColumns | 'externalId'>;
+export type RestaurantChanges = Pick<Updateable<Restaurant>, EditableColumns>;

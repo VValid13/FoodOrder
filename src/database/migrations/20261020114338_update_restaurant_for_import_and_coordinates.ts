@@ -4,10 +4,10 @@ import type { Kysely } from 'kysely';
 export async function up(db: Kysely<unknown>): Promise<void> {
   await db.schema
     .alterTable('restaurant')
-    .addColumn('owner_id', 'uuid', (column) =>
-      column.notNull().references('user.id').onDelete('cascade'),
-    )
-    .addColumn('external_id', 'text')
+    .addColumn('external_id', 'text', (column) => column.unique())
+    .addColumn('latitude', 'double precision')
+    .addColumn('longitude', 'double precision')
+    .dropColumn('coordinates')
     .execute();
 
   await db.schema
@@ -17,13 +17,12 @@ export async function up(db: Kysely<unknown>): Promise<void> {
 
   await db.schema
     .alterTable('restaurant')
-    .addUniqueConstraint('restaurant_owner_id_external_id_unique', ['owner_id', 'external_id'])
-    .execute();
-
-  await db.schema
-    .createIndex('restaurant_owner_id_index')
-    .on('restaurant')
-    .column('owner_id')
+    .addCheckConstraint(
+      'restaurant_coordinates_check',
+      sql`(latitude is null) = (longitude is null)
+        and (latitude is null or latitude between -90 and 90)
+        and (longitude is null or longitude between -180 and 180)`,
+    )
     .execute();
 
   await db.schema
@@ -48,12 +47,7 @@ export async function down(db: Kysely<unknown>): Promise<void> {
     .addCheckConstraint('opening_slot_day_of_week_check', sql`day_of_week between 1 and 7`)
     .execute();
 
-  await db.schema.dropIndex('restaurant_owner_id_index').execute();
-
-  await db.schema
-    .alterTable('restaurant')
-    .dropConstraint('restaurant_owner_id_external_id_unique')
-    .execute();
+  await db.schema.alterTable('restaurant').dropConstraint('restaurant_coordinates_check').execute();
 
   await db.schema
     .alterTable('restaurant')
@@ -62,7 +56,9 @@ export async function down(db: Kysely<unknown>): Promise<void> {
 
   await db.schema
     .alterTable('restaurant')
+    .addColumn('coordinates', 'text')
+    .dropColumn('longitude')
+    .dropColumn('latitude')
     .dropColumn('external_id')
-    .dropColumn('owner_id')
     .execute();
 }

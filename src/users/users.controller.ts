@@ -13,10 +13,17 @@ export class UsersController {
     private readonly userMapper: UserMapper,
   ) {}
   @Protect()
-  @Get(':userID')
-  @ApiParam({ type: 'string', name: 'userId' })
+  @Get('/id/:userID')
+  @ApiParam({ type: 'UUID', name: 'userId' })
   @ApiOperation({ summary: 'Get user informations from id' })
   async getUserById(@Param('userID') userID: crypto.UUID) {
     return this.userMapper.toGetUserDto(await this.userService.getUserById(userID));
+  }
+  @Protect()
+  @Get('/name/:username')
+  @ApiParam({ type: 'string', name: 'username' })
+  @ApiOperation({ summary: 'Get user informations from username' })
+  async getUserByUsername(@Param('username') username: string) {
+    return this.userMapper.toGetUserDto(await this.userService.getUserByUsername(username));
   }
 }
