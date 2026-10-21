@@ -9,9 +9,9 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import { PostgresExceptionFilter } from './_utils/filters/postgres-exception-filter.js';
 
-dayjs.extend(customParseFormat);
-
 async function bootstrap() {
+  dayjs.extend(customParseFormat);
+
   const app = await NestFactory.create(AppModule);
   configureApp(app);
 
