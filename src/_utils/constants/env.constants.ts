@@ -12,6 +12,7 @@ export const ENV_KEYS = {
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
   S3_SECRET_KEY: 'S3_SECRET_KEY',
   S3_BUCKET: 'S3_BUCKET',
+  PLACES_API_URL: 'PLACES_API_URL',
 } as const satisfies Record<string, keyof EnvironmentVariables>;
 
 export type EnvType = ValueOf<typeof ENV_KEYS>;
@@ -19,3 +20,4 @@ export type EnvType = ValueOf<typeof ENV_KEYS>;
 export const ENV_FILE_PATH = '.env';
 export const MIN_PORT = 1;
 export const MAX_PORT = 65_535;
+export const HTTPS_PROTOCOL = 'https';

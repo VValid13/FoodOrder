@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { IsInt, IsNumber, IsString, IsUrl, Max, Min, validateSync } from 'class-validator';
-import { MAX_PORT, MIN_PORT } from '../constants/env.constants.js';
+import { HTTPS_PROTOCOL, MAX_PORT, MIN_PORT } from '../constants/env.constants.js';
 import { IsNotEmptyString } from '../decorators/is-not-empty-string.decorator.js';
 import { Optional } from 'class-validator-extended';
 
@@ -46,6 +46,9 @@ export class EnvironmentVariables {
 
   @IsNotEmptyString()
   S3_BUCKET: string;
+
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: [HTTPS_PROTOCOL] })
+  PLACES_API_URL: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

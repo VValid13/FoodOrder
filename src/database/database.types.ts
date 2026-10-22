@@ -120,10 +120,12 @@ export interface Payment {
 
 export interface Restaurant {
   address: string;
-  coordinates: string | null;
   createdAt: Generated<Timestamp>;
+  externalId: string | null;
   id: Generated<UUID>;
-  menuId: UUID;
+  latitude: number | null;
+  longitude: number | null;
+  menuId: UUID | null;
   name: string;
   phone: string | null;
   timezone: Generated<string>;
