@@ -6,7 +6,7 @@ import { UserMapper } from './users.mapper.js';
 import { UserEntity } from './users.entity.js';
 import { GetUserDto } from './_utils/dtos/responses/get-user.dto.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
-import {createHash} from "node:crypto";
+import { createHash } from 'node:crypto';
 
 @Injectable()
 export class UsersService {
@@ -17,26 +17,25 @@ export class UsersService {
   ) {}
   // /!\ TO DELETE: DIPLICATE IN AUTH_SERVICE
   private hashRefreshToken = (rawToken: string) =>
-      createHash('sha256').update(rawToken).digest('hex');
+    createHash('sha256').update(rawToken).digest('hex');
 
   async createUser(createUserDto: CreateUserDto) {
     const newUserEntity: UserEntity = this.userMapper.toNewEntity(
       createUserDto,
       await this.encryptionService.encrypt(createUserDto.password),
     );
-      await this.userRepository.createUser(newUserEntity);
-      //return newUserEntity;
+    await this.userRepository.createUser(newUserEntity);
+    //return newUserEntity;
   }
   async getUserById(id: UUID) {
     return await this.userRepository.findById(id);
   }
   async getSelfUserByToken(token: string) {
     try {
-      return await this.userRepository.findById
-      (
-          await this.userRepository.findUseridByValidTokenHash(this.hashRefreshToken(token))
-      )
-    }catch {
+      return await this.userRepository.findById(
+        await this.userRepository.findUseridByValidTokenHash(this.hashRefreshToken(token)),
+      );
+    } catch {
       throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
     }
   }
@@ -54,14 +53,11 @@ export class UsersService {
 
   async updateSelfUsernameByToken(token: string, newUsername: string) {
     try {
-      console.log('in try');
-       await this.userRepository.updateUsername
-      (
-          await this.userRepository.findUseridByValidTokenHash(this.hashRefreshToken(token)),
-          newUsername
-      )
-    }catch (err){
-      console.log('catch updateUser Service')
+      await this.userRepository.updateUsername(
+        await this.userRepository.findUseridByValidTokenHash(this.hashRefreshToken(token)),
+        newUsername,
+      );
+    } catch (err) {
       throw new UnauthorizedException(err);
     }
   }

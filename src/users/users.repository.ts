@@ -4,7 +4,7 @@ import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserEntity } from './users.entity.js';
-import {RefreshTokenEntity} from "../auth/entity/refresh-token.entity.js";
+import { RefreshTokenEntity } from '../auth/entity/refresh-token.entity.js';
 
 @Injectable()
 export class UsersRepository {
@@ -19,12 +19,11 @@ export class UsersRepository {
   }
   async findUseridByValidTokenHash(tokenHash: string): Promise<UUID> {
     const refreshToken: RefreshTokenEntity = await this.db
-        .selectFrom('token')
-        .selectAll()
-        .where('tokenHash','=', tokenHash)
-        .where('isActive','=',true)
-        .executeTakeFirstOrThrow();
-    console.log(refreshToken);
+      .selectFrom('token')
+      .selectAll()
+      .where('tokenHash', '=', tokenHash)
+      .where('isActive', '=', true)
+      .executeTakeFirstOrThrow();
     return refreshToken.userId;
   }
   async createUser(userInfos: UserEntity) {
@@ -55,14 +54,13 @@ export class UsersRepository {
   }
 
   async updateUsername(userId: UUID, newUsername: string) {
-    console.log('access to db');
     return await this.db
-        .updateTable('user')
-        .set({
-          username: newUsername,
-          updatedAt: new Date(),
-        })
-        .where('id','=',userId)
-        .executeTakeFirstOrThrow();
+      .updateTable('user')
+      .set({
+        username: newUsername,
+        updatedAt: new Date(),
+      })
+      .where('id', '=', userId)
+      .executeTakeFirstOrThrow();
   }
 }
