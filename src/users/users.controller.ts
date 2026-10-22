@@ -1,11 +1,12 @@
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Param, Post, Req, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import * as crypto from 'crypto';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import { UserMapper } from './users.mapper.js';
-import type { Request } from 'express';
-import { REFRESH_COOKIE } from '../auth/_utils/constants/refresh-token.constants.js';
+import { ChangeUsernameDto } from './_utils/dtos/requests/change-username.dto.js';
+import { GetUserPropertyInPayload } from '../_utils/decorators/connected-user-decorator.js';
+import * as nodeCrypto from 'node:crypto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -14,6 +15,7 @@ export class UsersController {
     private readonly userService: UsersService,
     private readonly userMapper: UserMapper,
   ) {}
+
   @Protect()
   @Get('/id/:userID')
   @ApiParam({ type: 'UUID', name: 'userId' })
@@ -21,6 +23,7 @@ export class UsersController {
   async getUserById(@Param('userID') userID: crypto.UUID) {
     return this.userMapper.toGetUserDto(await this.userService.getUserById(userID));
   }
+
   @Protect()
   @Get('/name/:username')
   @ApiParam({ type: 'string', name: 'username' })
@@ -32,22 +35,18 @@ export class UsersController {
   @Protect()
   @Get('/me')
   @ApiOperation({ summary: 'Get user informations from me' })
-  async getMe(@Req() req: Request) {
-    const token: string | undefined = req.cookies?.[REFRESH_COOKIE];
-    if (!token) {
-      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
-    }
-    return this.userMapper.toGetUserDto(await this.userService.getSelfUserByToken(token));
+  async getMe(@GetUserPropertyInPayload('id') userId: nodeCrypto.UUID) {
+    return this.userMapper.toGetUserDto(await this.userService.getUserByIdOrUnauthorized(userId));
   }
+
   @Protect()
   @Post('/me/:newUsername')
   @ApiParam({ type: 'string', name: 'newUsername' })
   @ApiOperation({ summary: 'Get user informations from me' })
-  async updateMe(@Req() req: Request, @Param('newUsername') newUsername: string) {
-    const token: string | undefined = req.cookies?.[REFRESH_COOKIE];
-    if (!token) {
-      throw new UnauthorizedException('INVALID_REFRESH_TOKEN');
-    }
-    return await this.userService.updateSelfUsernameByToken(token, newUsername);
+  async updateMe(
+    @Body('changeUsernameDto') changeUsernameDto: ChangeUsernameDto,
+    @GetUserPropertyInPayload('id') userId: nodeCrypto.UUID,
+  ) {
+    return await this.userService.updateSelfUsername(changeUsernameDto, userId);
   }
 }
