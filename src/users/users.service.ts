@@ -19,13 +19,13 @@ export class UsersService {
   private hashRefreshToken = (rawToken: string) =>
       createHash('sha256').update(rawToken).digest('hex');
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async createUser(createUserDto: CreateUserDto) {
     const newUserEntity: UserEntity = this.userMapper.toNewEntity(
       createUserDto,
       await this.encryptionService.encrypt(createUserDto.password),
     );
-    await this.userRepository.createUser(newUserEntity);
-    return newUserEntity;
+      await this.userRepository.createUser(newUserEntity);
+      //return newUserEntity;
   }
   async getUserById(id: UUID) {
     return await this.userRepository.findById(id);
@@ -55,7 +55,7 @@ export class UsersService {
   async updateSelfUsernameByToken(token: string, newUsername: string) {
     try {
       console.log('in try');
-      return await this.userRepository.updateUsername
+       await this.userRepository.updateUsername
       (
           await this.userRepository.findUseridByValidTokenHash(this.hashRefreshToken(token)),
           newUsername
