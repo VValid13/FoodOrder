@@ -35,7 +35,7 @@ export class UsersController {
   @Protect()
   @Get('/me')
   @ApiOperation({ summary: 'Get user informations from me' })
-  async getMe(@GetUserPropertyInPayload('id') userId: nodeCrypto.UUID) {
+  async getMe(@GetUserPropertyInPayload() userId: nodeCrypto.UUID) {
     return this.userMapper.toGetUserDto(await this.userService.getUserByIdOrUnauthorized(userId));
   }
 
@@ -45,7 +45,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user informations from me' })
   async updateMe(
     @Body('changeUsernameDto') changeUsernameDto: ChangeUsernameDto,
-    @GetUserPropertyInPayload('id') userId: nodeCrypto.UUID,
+    @GetUserPropertyInPayload() userId: nodeCrypto.UUID,
   ) {
     return await this.userService.updateSelfUsername(changeUsernameDto, userId);
   }
