@@ -14,8 +14,6 @@ export type InvitationStatus = "accepted" | "declined" | "pending" | "revoked";
 
 export type MemberStatus = "active" | "left";
 
-export type OptionKind = "extra" | "removal" | "size";
-
 export type OrderStatus = "cancelled" | "in_progress" | "modified" | "validated";
 
 export type PaymentMethod = "card" | "cash" | "other" | "transfer";
@@ -35,10 +33,14 @@ export interface CustomerOrder {
 }
 
 export interface Dish {
+  available: Generated<boolean>;
+  category: string;
   createdAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
   id: Generated<UUID>;
   label: string;
   menuId: UUID;
+  position: Generated<number>;
   price: number;
   updatedAt: Generated<Timestamp>;
 }
@@ -86,12 +88,22 @@ export interface OpeningSlot {
 
 export interface Option {
   createdAt: Generated<Timestamp>;
-  dishId: UUID;
   id: Generated<UUID>;
-  kind: OptionKind;
   label: string;
+  optionGroupId: UUID;
+  position: Generated<number>;
   price: Generated<number>;
   updatedAt: Generated<Timestamp>;
+}
+
+export interface OptionGroup {
+  createdAt: Generated<Timestamp>;
+  dishId: UUID;
+  id: Generated<UUID>;
+  label: string;
+  maxChoices: Generated<number>;
+  position: Generated<number>;
+  required: Generated<boolean>;
 }
 
 export interface OrderItem {
@@ -202,6 +214,7 @@ export interface DatabaseTables {
   menu: Menu;
   openingSlot: OpeningSlot;
   option: Option;
+  optionGroup: OptionGroup;
   orderItem: OrderItem;
   orderItemOption: OrderItemOption;
   payment: Payment;

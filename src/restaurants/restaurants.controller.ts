@@ -34,6 +34,7 @@ import { CreateRestaurantDto } from './_utils/dtos/requests/create-restaurant.dt
 import { FindRestaurantsDto } from './_utils/dtos/requests/find-restaurants.dto.js';
 import { UpdateRestaurantDto } from './_utils/dtos/requests/update-restaurant.dto.js';
 import { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.response.dto.js';
+import { RestaurantWithMenuResponseDto } from './_utils/dtos/responses/restaurant-with-menu.response.dto.js';
 import { ParseRestaurantPipe } from './_utils/pipes/parse-restaurant.pipe.js';
 import type { RestaurantDetails } from './_utils/types/restaurant-details.type.js';
 import { RestaurantsService } from './restaurants.service.js';
@@ -74,13 +75,13 @@ export class RestaurantsController {
   @Get(RESTAURANT_ID_ROUTE)
   @ApiOperation({ summary: 'Get a restaurant with its menu' })
   @ApiParam({ name: RESTAURANT_ID_PARAM, format: 'uuid' })
-  @ApiOkResponse({ type: RestaurantResponseDto })
+  @ApiOkResponse({ type: RestaurantWithMenuResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid restaurant id' })
   @ApiNotFoundResponse({ description: 'Restaurant not found' })
-  findRestaurant(
+  async findRestaurant(
     @Param(RESTAURANT_ID_PARAM, ParseRestaurantPipe) restaurant: RestaurantDetails,
-  ): RestaurantResponseDto {
-    return this.restaurantsService.findRestaurant(restaurant);
+  ): Promise<RestaurantWithMenuResponseDto> {
+    return await this.restaurantsService.findRestaurant(restaurant);
   }
 
   @Protect()

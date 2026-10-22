@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MenusModule } from '../menus/menus.module.js';
 import { PlacesModule } from '../places/places.module.js';
 import { RestaurantsExceptions } from './_utils/exceptions/restaurants.exceptions.js';
 import { RestaurantMapper } from './_utils/mappers/restaurant.mapper.js';
@@ -8,7 +9,7 @@ import { RestaurantsRepository } from './restaurants.repository.js';
 import { RestaurantsService } from './restaurants.service.js';
 
 @Module({
-  imports: [PlacesModule],
+  imports: [PlacesModule, MenusModule],
   controllers: [RestaurantsController],
   providers: [
     RestaurantsService,
