@@ -4,7 +4,6 @@ import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserEntity } from './users.entity.js';
-import { RefreshTokenEntity } from '../auth/entity/refresh-token.entity.js';
 import { ChangeUsernameDto } from './_utils/dtos/requests/change-username.dto.js';
 
 @Injectable()
@@ -17,15 +16,6 @@ export class UsersRepository {
       .selectAll()
       .where('id', '=', id)
       .executeTakeFirstOrThrow();
-  }
-  async findUseridByValidTokenHash(tokenHash: string): Promise<UUID> {
-    const refreshToken: RefreshTokenEntity = await this.db
-      .selectFrom('token')
-      .selectAll()
-      .where('tokenHash', '=', tokenHash)
-      .where('isActive', '=', true)
-      .executeTakeFirstOrThrow();
-    return refreshToken.userId;
   }
   async createUser(userInfos: UserEntity) {
     return await this.db
