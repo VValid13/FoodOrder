@@ -6,6 +6,7 @@ import { UserMapper } from './users.mapper.js';
 import { UserEntity } from './users.entity.js';
 import { GetUserDto } from './_utils/dtos/responses/get-user.dto.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
+import { ChangeUsernameDto } from './_utils/dtos/requests/change-username.dto.js';
 
 @Injectable()
 export class UsersService {
@@ -15,16 +16,22 @@ export class UsersService {
     private readonly encryptionService: EncryptionService,
   ) {}
 
-  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async createUser(createUserDto: CreateUserDto) {
     const newUserEntity: UserEntity = this.userMapper.toNewEntity(
       createUserDto,
       await this.encryptionService.encrypt(createUserDto.password),
     );
     await this.userRepository.createUser(newUserEntity);
-    return newUserEntity;
   }
   async getUserById(id: UUID) {
     return await this.userRepository.findById(id);
+  }
+  async getUserByIdOrUnauthorized(id: UUID) {
+    try {
+      return await this.userRepository.findById(id);
+    } catch {
+      throw new UnauthorizedException('Unauthorized');
+    }
   }
   async getUserByUsername(username: string) {
     return await this.userRepository.findOneByUsername(this.userMapper.formatUsername(username));
@@ -37,4 +44,8 @@ export class UsersService {
     }
   }
   getUser = (user: UserEntity): GetUserDto => this.userMapper.toGetUserDto(user);
+
+  async updateSelfUsername(changeUsernameDto: ChangeUsernameDto, userId: UUID) {
+    await this.userRepository.updateUsername(changeUsernameDto, userId);
+  }
 }

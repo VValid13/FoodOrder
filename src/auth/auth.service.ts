@@ -2,13 +2,14 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvironmentVariables } from '../_utils/config/env.config.js';
-import { createHash, randomBytes, UUID } from 'node:crypto';
+import { randomBytes, UUID } from 'node:crypto';
 import dayjs from 'dayjs';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository.js';
 import { UserEntity } from '../users/users.entity.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
 import { AuthMapper } from './auth.mapper.js';
 import { UsersService } from '../users/users.service.js';
+import { hashTokenHelper } from '../_utils/helpers/hash-token.helper.js';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly configService: ConfigService<EnvironmentVariables, true>,
     private readonly authMapper: AuthMapper,
+    private readonly hashTokenHelper: hashTokenHelper,
   ) {}
 
   async validateUser(username: string, password: string) {
@@ -28,9 +30,6 @@ export class AuthService {
 
     return user;
   }
-
-  private hashRefreshToken = (rawToken: string) =>
-    createHash('sha256').update(rawToken).digest('hex');
 
   async generateToken(user: UserEntity) {
     const payload = this.authMapper.toJwTokenInterface(user);
@@ -42,7 +41,7 @@ export class AuthService {
 
     await this.refreshTokenRepository.create(
       user.id,
-      this.hashRefreshToken(rawRefreshToken),
+      this.hashTokenHelper.hashRefreshToken(rawRefreshToken),
       expireAt,
     );
     return { accessToken, refreshToken: rawRefreshToken, refreshTokenExpireAt: expireAt };
@@ -51,7 +50,7 @@ export class AuthService {
   async refreshTokens(rawToken: string) {
     try {
       const refreshSchema = await this.refreshTokenRepository.findIdByValidTokenHash(
-        this.hashRefreshToken(rawToken),
+        this.hashTokenHelper.hashRefreshToken(rawToken),
       );
       await this.refreshTokenRepository.revokeByUserId(refreshSchema.userId);
       const user = await this.userService.getUserById(refreshSchema.userId);
@@ -65,6 +64,8 @@ export class AuthService {
   }
 
   async logout(rawToken: string) {
-    return await this.refreshTokenRepository.revokeByTokenHash(this.hashRefreshToken(rawToken));
+    return await this.refreshTokenRepository.revokeByTokenHash(
+      this.hashTokenHelper.hashRefreshToken(rawToken),
+    );
   }
 }
