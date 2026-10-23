@@ -41,13 +41,11 @@ export class UsersController {
 
   @Protect()
   @Post('/me')
-  //@ApiParam({ type: 'string', name: 'newUsername' })
   @ApiOperation({ summary: 'Get user informations from me' })
   async updateMe(
-    @Body('changeUsernameDto') changeUsernameDto: ChangeUsernameDto,
+    @Body() changeUsernameDto: ChangeUsernameDto,
     @GetUserPropertyInPayload() userId: nodeCrypto.UUID
   ) {
-    console.log(`change name of id : ${userId} to ${changeUsernameDto.username}`);
     return await this.userService.updateSelfUsername(changeUsernameDto, userId);
   }
 }
