@@ -44,7 +44,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user informations from me' })
   async updateMe(
     @Body() changeUsernameDto: ChangeUsernameDto,
-    @GetUserPropertyInPayload() userId: nodeCrypto.UUID
+    @GetUserPropertyInPayload() userId: nodeCrypto.UUID,
   ) {
     return await this.userService.updateSelfUsername(changeUsernameDto, userId);
   }
