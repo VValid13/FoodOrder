@@ -4,7 +4,7 @@ import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserEntity } from './users.entity.js';
-import { ChangeUsernameDto } from './_utils/dtos/requests/change-username.dto.js';
+import { UpdateUserDto } from './_utils/dtos/requests/update-user.dto.js';
 
 @Injectable()
 export class UsersRepository {
@@ -44,7 +44,7 @@ export class UsersRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async updateUsername(changeUsernameDto: ChangeUsernameDto, userId: UUID) {
+  async updateUsername(changeUsernameDto: UpdateUserDto, userId: UUID) {
     return await this.db
       .updateTable('user')
       .set({

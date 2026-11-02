@@ -6,7 +6,7 @@ import { UserMapper } from './users.mapper.js';
 import { UserEntity } from './users.entity.js';
 import { GetUserDto } from './_utils/dtos/responses/get-user.dto.js';
 import { EncryptionService } from '../encryption/encryption.service.js';
-import { ChangeUsernameDto } from './_utils/dtos/requests/change-username.dto.js';
+import { UpdateUserDto } from './_utils/dtos/requests/update-user.dto.js';
 
 @Injectable()
 export class UsersService {
@@ -45,7 +45,7 @@ export class UsersService {
   }
   getUser = (user: UserEntity): GetUserDto => this.userMapper.toGetUserDto(user);
 
-  async updateSelfUsername(changeUsernameDto: ChangeUsernameDto, userId: UUID) {
+  async updateSelfUsername(changeUsernameDto: UpdateUserDto, userId: UUID) {
     await this.userRepository.updateUsername(changeUsernameDto, userId);
   }
 }
