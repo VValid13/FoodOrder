@@ -1,5 +1,5 @@
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import * as crypto from 'crypto';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
