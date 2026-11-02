@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Post, Patch, Delete } from '@nestjs/common';
+import {Body, Controller, Get, Post, Patch, Delete, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import * as crypto from 'crypto';
 import { ContactService } from './contacts.service.js';
@@ -16,7 +16,6 @@ export class ContactsController {
 
   @Protect()
   @Get('')
-  @ApiParam({ type: 'UUID', name: 'userId' })
   @ApiOperation({ summary: 'Get all owned lists' })
   async getMyLists(@GetUserPropertyInPayload() userId: crypto.UUID) {
     return await this.contactService.getMyLists(userId)
@@ -24,17 +23,19 @@ export class ContactsController {
   
   @Protect()
   @Post('')
-  @ApiParam({ type: 'UUID', name: 'userId' })
   @ApiOperation({ summary: 'create new empty group' })
   async createList(@GetUserPropertyInPayload() userId: crypto.UUID) {
     await this.contactService.createGroup(userId);
   }    
 
   @Get('/:id/members')
-  @ApiParam({ type: 'UUID', name: 'id' })
+  @ApiParam({ type: 'UUID', name: 'groupId' })
   @ApiOperation({ summary: 'Get all members in list' })
-  async getUsersInList() {
-  console.log("@Get('/:id/members')")
+  async getUsersInList(
+    @GetUserPropertyInPayload() ownerId: crypto.UUID,
+    @Param('id') groupId: crypto.UUID
+  ) {
+   return await this.contactService.getUsersInList(ownerId, groupId);
   }
 
   @Patch('/:id/members/:memberId')

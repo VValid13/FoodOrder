@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { UUID } from 'crypto';
+import { randomUUID, UUID } from 'crypto';
 import { Kysely } from 'kysely';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
-import { DatabaseTables } from '../database/database.types.js';
+import { DatabaseTables, User } from '../database/database.types.js';
 import { ContactEntity } from './contacts.entity.js';
+import { group } from 'console';
 
 @Injectable()
 export class ContactRepository {
@@ -24,6 +25,26 @@ export class ContactRepository {
         ...groupInfo,
       })
       .executeTakeFirstOrThrow();
+  }
+
+  async addMember(groupId: UUID, newUserId: UUID){
+    return await this.db
+    .insertInto('userGroupMember')
+    .values({
+        createdAt: new Date(),
+        userGroupId: groupId,
+        userId: newUserId,
+    })
+    .executeTakeFirstOrThrow()
+  }
+
+  async getGroupMembers(ownerId: UUID,groupId: UUID){
+    return await this.db
+    .selectFrom('user')
+    .selectAll()
+    .innerJoin('userGroup', 'userGroup.id', 'user.id')
+    .where('userGroup.id', '=', groupId)
+    .execute()
   }
   /*
   async createList(userInfos: UserEntity) {

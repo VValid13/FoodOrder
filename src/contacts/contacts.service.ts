@@ -13,7 +13,9 @@ export class ContactService {
     return await this.contactRepository.findListByOwnerId(ownerId);
   }
 
-  async getUsersInList() {}
+  async getUsersInList(ownerId: UUID, groupId: UUID) {
+    return await this.contactRepository.getGroupMembers(ownerId,groupId);
+  }
 
   async patchUsersInList() {}
 
