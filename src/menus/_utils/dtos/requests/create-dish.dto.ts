@@ -3,8 +3,6 @@ import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
-  IsBoolean,
-  IsInt,
   IsNumber,
   Max,
   MaxLength,
@@ -18,7 +16,6 @@ import {
   DISH_LABEL_MAX_LENGTH,
   MAX_OPTION_GROUPS_PER_DISH,
   MAX_PRICE,
-  MIN_POSITION,
   MIN_PRICE,
   PRICE_DECIMAL_PLACES,
   PRICE_FORMAT_MESSAGE,
@@ -42,21 +39,11 @@ export class CreateDishDto {
   @Max(MAX_PRICE)
   price: number;
 
-  @ApiPropertyOptional({ example: true, default: true })
-  @Optional()
-  @IsBoolean()
-  available?: boolean;
-
-  @ApiPropertyOptional({ example: 0, minimum: MIN_POSITION, default: MIN_POSITION })
-  @Optional()
-  @IsInt()
-  @Min(MIN_POSITION)
-  position?: number;
-
   @ApiPropertyOptional({
     type: [OptionGroupDto],
     maxItems: MAX_OPTION_GROUPS_PER_DISH,
-    description: 'On update, replaces every option group of the dish',
+    description:
+      'On update: groups and options with an id are edited, without an id they are created, missing ones are removed',
   })
   @Optional()
   @IsArray()

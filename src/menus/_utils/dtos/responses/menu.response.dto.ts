@@ -9,7 +9,7 @@ export class MenuResponseDto {
   @ApiProperty({ example: "McDonald's France" })
   name: string;
 
-  @ApiProperty({ type: [DishResponseDto], description: 'Sorted by category then position' })
+  @ApiProperty({ type: [DishResponseDto], description: 'Sorted by category then label' })
   dishes: DishResponseDto[];
 
   @ApiProperty()

@@ -22,6 +22,8 @@ export type SessionStatus = "closed" | "draft" | "open" | "ordered";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export type UserRole = "admin" | "user";
+
 export interface CustomerOrder {
   createdAt: Generated<Timestamp>;
   id: Generated<UUID>;
@@ -33,14 +35,12 @@ export interface CustomerOrder {
 }
 
 export interface Dish {
-  available: Generated<boolean>;
   category: string;
   createdAt: Generated<Timestamp>;
   deletedAt: Timestamp | null;
   id: Generated<UUID>;
   label: string;
   menuId: UUID;
-  position: Generated<number>;
   price: number;
   updatedAt: Generated<Timestamp>;
 }
@@ -187,6 +187,7 @@ export interface User {
   createdAt: Generated<Timestamp>;
   id: Generated<UUID>;
   passwordHash: string;
+  role: Generated<UserRole>;
   updatedAt: Generated<Timestamp>;
   username: string;
 }

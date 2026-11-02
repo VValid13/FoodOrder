@@ -10,10 +10,7 @@ export type OptionGroupDetails = Pick<
   options: OptionDetails[];
 };
 
-export type DishDetails = Pick<
-  Selectable<Dish>,
-  'id' | 'label' | 'category' | 'price' | 'available' | 'position'
-> & {
+export type DishDetails = Pick<Selectable<Dish>, 'id' | 'label' | 'category' | 'price'> & {
   optionGroups: OptionGroupDetails[];
 };
 

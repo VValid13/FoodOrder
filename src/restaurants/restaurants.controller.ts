@@ -22,6 +22,8 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { USER_ROLES } from '../_utils/constants/user-role.constants.js';
+import { ParseEntityPipe } from '../_utils/pipes/parse-entity.pipe.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import {
   RESTAURANT_ID_PARAM,
@@ -35,16 +37,18 @@ import { FindRestaurantsDto } from './_utils/dtos/requests/find-restaurants.dto.
 import { UpdateRestaurantDto } from './_utils/dtos/requests/update-restaurant.dto.js';
 import { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.response.dto.js';
 import { RestaurantWithMenuResponseDto } from './_utils/dtos/responses/restaurant-with-menu.response.dto.js';
-import { ParseRestaurantPipe } from './_utils/pipes/parse-restaurant.pipe.js';
 import type { RestaurantDetails } from './_utils/types/restaurant-details.type.js';
+import { RestaurantsRepository } from './restaurants.repository.js';
 import { RestaurantsService } from './restaurants.service.js';
+
+const ParseRestaurantPipe = ParseEntityPipe(RestaurantsRepository, 'findRestaurantByIdOrFail');
 
 @ApiTags(RESTAURANTS_TAG)
 @Controller(RESTAURANTS_ROUTE)
 export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Post()
   @ApiOperation({ summary: 'Create a restaurant' })
   @ApiCreatedResponse({ type: RestaurantResponseDto })
@@ -84,7 +88,7 @@ export class RestaurantsController {
     return await this.restaurantsService.findRestaurant(restaurant);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Patch(RESTAURANT_ID_ROUTE)
   @ApiOperation({ summary: 'Update a restaurant' })
   @ApiParam({ name: RESTAURANT_ID_PARAM, format: 'uuid' })
@@ -99,7 +103,7 @@ export class RestaurantsController {
     return await this.restaurantsService.updateRestaurant(restaurant, updateRestaurantDto);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Delete(RESTAURANT_ID_ROUTE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a restaurant' })

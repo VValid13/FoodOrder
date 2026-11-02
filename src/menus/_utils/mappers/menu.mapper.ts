@@ -5,18 +5,18 @@ import type { UpdateDishDto } from '../dtos/requests/update-dish.dto.js';
 import type { DishResponseDto } from '../dtos/responses/dish.response.dto.js';
 import type { MenuResponseDto } from '../dtos/responses/menu.response.dto.js';
 import type { DishDetails, MenuDetails } from '../types/menu-details.type.js';
-import type { DishUpdate, NewDish, NewOptionGroup } from '../types/menu-values.type.js';
+import type { DishUpdate, NewDish, OptionGroupInput } from '../types/menu-values.type.js';
 
 @Injectable()
 export class MenuMapper {
   toNewDish({ optionGroups = [], ...values }: CreateDishDto): NewDish {
-    return { values, optionGroups: this.toNewOptionGroups(optionGroups) };
+    return { values, optionGroups: this.toOptionGroupInputs(optionGroups) };
   }
 
   toDishUpdate({ optionGroups, ...changes }: UpdateDishDto): DishUpdate {
     return {
       changes,
-      optionGroups: optionGroups ? this.toNewOptionGroups(optionGroups) : undefined,
+      optionGroups: optionGroups ? this.toOptionGroupInputs(optionGroups) : undefined,
     };
   }
 
@@ -39,8 +39,6 @@ export class MenuMapper {
       label: dish.label,
       category: dish.category,
       price: dish.price,
-      available: dish.available,
-      position: dish.position,
       optionGroups: dish.optionGroups.map((group) => ({
         id: group.id,
         label: group.label,
@@ -55,10 +53,14 @@ export class MenuMapper {
     };
   }
 
-  private toNewOptionGroups(optionGroups: OptionGroupDto[]): NewOptionGroup[] {
-    return optionGroups.map(({ options, ...group }, groupPosition) => ({
+  private toOptionGroupInputs(optionGroups: OptionGroupDto[]): OptionGroupInput[] {
+    return optionGroups.map(({ id, options, ...group }, groupPosition) => ({
+      id,
       values: { ...group, position: groupPosition },
-      options: options.map((option, optionPosition) => ({ ...option, position: optionPosition })),
+      options: options.map(({ id: optionId, ...option }, optionPosition) => ({
+        id: optionId,
+        values: { ...option, position: optionPosition },
+      })),
     }));
   }
 }

@@ -15,12 +15,6 @@ export class DishResponseDto {
   @ApiProperty({ example: 8.3 })
   price: number;
 
-  @ApiProperty({ example: true })
-  available: boolean;
-
-  @ApiProperty({ example: 0 })
-  position: number;
-
   @ApiProperty({ type: [OptionGroupResponseDto] })
   optionGroups: OptionGroupResponseDto[];
 }

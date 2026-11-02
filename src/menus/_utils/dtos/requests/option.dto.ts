@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, Max, MaxLength, Min } from 'class-validator';
+import { IsNumber, IsUUID, Max, MaxLength, Min } from 'class-validator';
 import { Optional } from 'class-validator-extended';
+import type { UUID } from 'node:crypto';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
 import {
   MAX_PRICE,
@@ -11,6 +12,11 @@ import {
 } from '../../constants/menus.constants.js';
 
 export class OptionDto {
+  @ApiPropertyOptional({ format: 'uuid', description: 'On update, keeps and edits this option' })
+  @Optional()
+  @IsUUID()
+  id?: UUID;
+
   @ApiProperty({ example: 'Large', maxLength: OPTION_LABEL_MAX_LENGTH })
   @IsNotEmptyString()
   @MaxLength(OPTION_LABEL_MAX_LENGTH)

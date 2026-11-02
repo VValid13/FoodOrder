@@ -5,14 +5,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
   await db.schema
     .alterTable('dish')
     .addColumn('category', 'text', (column) => column.notNull())
-    .addColumn('available', 'boolean', (column) => column.notNull().defaultTo(true))
-    .addColumn('position', 'integer', (column) => column.notNull().defaultTo(0))
     .addColumn('deleted_at', 'timestamptz')
-    .execute();
-
-  await db.schema
-    .alterTable('dish')
-    .addCheckConstraint('dish_position_check', sql`position >= 0`)
     .execute();
 
   await db.schema
@@ -83,13 +76,5 @@ export async function down(db: Kysely<unknown>): Promise<void> {
 
   await db.schema.dropTable('option_group').execute();
 
-  await db.schema.alterTable('dish').dropConstraint('dish_position_check').execute();
-
-  await db.schema
-    .alterTable('dish')
-    .dropColumn('deleted_at')
-    .dropColumn('position')
-    .dropColumn('available')
-    .dropColumn('category')
-    .execute();
+  await db.schema.alterTable('dish').dropColumn('deleted_at').dropColumn('category').execute();
 }

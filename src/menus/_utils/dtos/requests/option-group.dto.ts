@@ -4,14 +4,16 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsBoolean,
   IsInt,
+  IsUUID,
   MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
 import { Optional } from 'class-validator-extended';
+import type { UUID } from 'node:crypto';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
+import { ToBoolean } from '../../../../_utils/decorators/to-boolean.decorator.js';
 import { IsAtMostLengthOf } from '../../../../_utils/validators/is-at-most-length-of.validator.js';
 import {
   MAX_OPTIONS_PER_GROUP,
@@ -21,6 +23,11 @@ import {
 import { OptionDto } from './option.dto.js';
 
 export class OptionGroupDto {
+  @ApiPropertyOptional({ format: 'uuid', description: 'On update, keeps and edits this group' })
+  @Optional()
+  @IsUUID()
+  id?: UUID;
+
   @ApiProperty({ example: 'Size', maxLength: OPTION_GROUP_LABEL_MAX_LENGTH })
   @IsNotEmptyString()
   @MaxLength(OPTION_GROUP_LABEL_MAX_LENGTH)
@@ -28,7 +35,7 @@ export class OptionGroupDto {
 
   @ApiPropertyOptional({ example: true, default: false })
   @Optional()
-  @IsBoolean()
+  @ToBoolean()
   required?: boolean;
 
   @ApiPropertyOptional({ example: 1, minimum: MIN_CHOICES, default: MIN_CHOICES })

@@ -21,6 +21,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { UUID } from 'node:crypto';
+import { USER_ROLES } from '../_utils/constants/user-role.constants.js';
+import { ParseEntityPipe } from '../_utils/pipes/parse-entity.pipe.js';
+import { ParseUuidPipe } from '../_utils/pipes/parse-uuid.pipe.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import {
   DISH_ID_PARAM,
@@ -36,18 +39,18 @@ import { CreateMenuDto } from './_utils/dtos/requests/create-menu.dto.js';
 import { UpdateDishDto } from './_utils/dtos/requests/update-dish.dto.js';
 import { UpdateMenuDto } from './_utils/dtos/requests/update-menu.dto.js';
 import { MenuResponseDto } from './_utils/dtos/responses/menu.response.dto.js';
-import { TOO_MANY_DISHES_MESSAGE } from './_utils/exceptions/menus.exceptions.js';
-import { ParseDishIdPipe } from './_utils/pipes/parse-dish-id.pipe.js';
-import { ParseMenuPipe } from './_utils/pipes/parse-menu.pipe.js';
 import type { MenuDetails } from './_utils/types/menu-details.type.js';
+import { MenusRepository } from './menus.repository.js';
 import { MenusService } from './menus.service.js';
+
+const ParseMenuPipe = ParseEntityPipe(MenusRepository, 'findMenuByIdOrFail');
 
 @ApiTags(MENUS_TAG)
 @Controller(MENUS_ROUTE)
 export class MenusController {
   constructor(private readonly menusService: MenusService) {}
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Post()
   @ApiOperation({ summary: 'Create a menu' })
   @ApiCreatedResponse({ type: MenuResponseDto })
@@ -66,7 +69,7 @@ export class MenusController {
 
   @Protect()
   @Get(MENU_ID_ROUTE)
-  @ApiOperation({ summary: 'Get a menu with its dishes sorted by category then position' })
+  @ApiOperation({ summary: 'Get a menu with its dishes sorted by category then label' })
   @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
   @ApiOkResponse({ type: MenuResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid menu id' })
@@ -75,7 +78,7 @@ export class MenusController {
     return this.menusService.findMenu(menu);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Patch(MENU_ID_ROUTE)
   @ApiOperation({ summary: 'Rename a menu' })
   @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
@@ -89,7 +92,7 @@ export class MenusController {
     return await this.menusService.updateMenu(menu, updateMenuDto);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Delete(MENU_ID_ROUTE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a menu and its dishes' })
@@ -102,12 +105,12 @@ export class MenusController {
     await this.menusService.deleteMenu(menu);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Post(DISHES_ROUTE)
   @ApiOperation({ summary: 'Add a dish with its option groups to a menu' })
   @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
   @ApiCreatedResponse({ type: MenuResponseDto })
-  @ApiBadRequestResponse({ description: `Invalid menu id or body. ${TOO_MANY_DISHES_MESSAGE}` })
+  @ApiBadRequestResponse({ description: 'Invalid menu id or body' })
   @ApiNotFoundResponse({ description: 'Menu not found' })
   async createDish(
     @Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails,
@@ -116,7 +119,7 @@ export class MenusController {
     return await this.menusService.createDish(menu, createDishDto);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Patch(DISH_ID_ROUTE)
   @ApiOperation({ summary: 'Update a dish, optionGroups replaces every option group' })
   @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
@@ -127,13 +130,13 @@ export class MenusController {
   @ApiConflictResponse({ description: 'Options of an already ordered dish cannot be replaced' })
   async updateDish(
     @Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails,
-    @Param(DISH_ID_PARAM, ParseDishIdPipe) dishId: UUID,
+    @Param(DISH_ID_PARAM, ParseUuidPipe) dishId: UUID,
     @Body() updateDishDto: UpdateDishDto,
   ): Promise<MenuResponseDto> {
     return await this.menusService.updateDish(menu, dishId, updateDishDto);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Delete(DISH_ID_ROUTE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a dish from a menu, already ordered items keep it' })
@@ -144,7 +147,7 @@ export class MenusController {
   @ApiNotFoundResponse({ description: 'Menu or dish not found' })
   async deleteDish(
     @Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails,
-    @Param(DISH_ID_PARAM, ParseDishIdPipe) dishId: UUID,
+    @Param(DISH_ID_PARAM, ParseUuidPipe) dishId: UUID,
   ): Promise<void> {
     await this.menusService.deleteDish(menu, dishId);
   }
