@@ -5,7 +5,9 @@ import { formatTime, parseTime } from '../../../_utils/helpers/parse-time.helper
 import type { Time } from '../../../_utils/types/time.type.js';
 import type { CreateRestaurantDto } from '../dtos/requests/create-restaurant.dto.js';
 import type { UpdateRestaurantDto } from '../dtos/requests/update-restaurant.dto.js';
+import type { MenuResponseDto } from '../../../menus/_utils/dtos/responses/menu.response.dto.js';
 import type { RestaurantResponseDto } from '../dtos/responses/restaurant.response.dto.js';
+import type { RestaurantWithMenuResponseDto } from '../dtos/responses/restaurant-with-menu.response.dto.js';
 import type { NewRestaurant } from '../types/new-restaurant.type.js';
 import type { RestaurantDetails } from '../types/restaurant-details.type.js';
 import type { RestaurantChanges } from '../types/restaurant-values.type.js';
@@ -62,6 +64,13 @@ export class RestaurantMapper {
       createdAt: restaurant.createdAt,
       updatedAt: restaurant.updatedAt,
     };
+  }
+
+  toResponseWithMenu(
+    restaurant: RestaurantDetails,
+    menu: MenuResponseDto | null,
+  ): RestaurantWithMenuResponseDto {
+    return { ...this.toResponse(restaurant), menu };
   }
 
   toResponseList = (restaurants: RestaurantDetails[]): RestaurantResponseDto[] =>

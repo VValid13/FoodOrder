@@ -14,8 +14,6 @@ export type InvitationStatus = "accepted" | "declined" | "pending" | "revoked";
 
 export type MemberStatus = "active" | "left";
 
-export type OptionKind = "extra" | "removal" | "size";
-
 export type OrderStatus = "cancelled" | "in_progress" | "modified" | "validated";
 
 export type PaymentMethod = "card" | "cash" | "other" | "transfer";
@@ -23,6 +21,8 @@ export type PaymentMethod = "card" | "cash" | "other" | "transfer";
 export type SessionStatus = "closed" | "draft" | "open" | "ordered";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
+export type UserRole = "admin" | "user";
 
 export interface CustomerOrder {
   createdAt: Generated<Timestamp>;
@@ -35,7 +35,9 @@ export interface CustomerOrder {
 }
 
 export interface Dish {
+  category: string;
   createdAt: Generated<Timestamp>;
+  deletedAt: Timestamp | null;
   id: Generated<UUID>;
   label: string;
   menuId: UUID;
@@ -86,12 +88,22 @@ export interface OpeningSlot {
 
 export interface Option {
   createdAt: Generated<Timestamp>;
-  dishId: UUID;
   id: Generated<UUID>;
-  kind: OptionKind;
   label: string;
+  optionGroupId: UUID;
+  position: Generated<number>;
   price: Generated<number>;
   updatedAt: Generated<Timestamp>;
+}
+
+export interface OptionGroup {
+  createdAt: Generated<Timestamp>;
+  dishId: UUID;
+  id: Generated<UUID>;
+  label: string;
+  maxChoices: Generated<number>;
+  position: Generated<number>;
+  required: Generated<boolean>;
 }
 
 export interface OrderItem {
@@ -175,6 +187,7 @@ export interface User {
   createdAt: Generated<Timestamp>;
   id: Generated<UUID>;
   passwordHash: string;
+  role: Generated<UserRole>;
   updatedAt: Generated<Timestamp>;
   username: string;
 }
@@ -202,6 +215,7 @@ export interface DatabaseTables {
   menu: Menu;
   openingSlot: OpeningSlot;
   option: Option;
+  optionGroup: OptionGroup;
   orderItem: OrderItem;
   orderItemOption: OrderItemOption;
   payment: Payment;

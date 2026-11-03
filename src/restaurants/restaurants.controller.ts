@@ -22,7 +22,11 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Selectable } from 'kysely';
+import { USER_ROLES } from '../_utils/constants/user-role.constants.js';
+import { getEntityByIdPipe } from '../_utils/pipes/get-entity-by-id.pipe.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
+import type { Restaurant } from '../database/database.types.js';
 import {
   RESTAURANT_ID_PARAM,
   RESTAURANT_ID_ROUTE,
@@ -34,8 +38,7 @@ import { CreateRestaurantDto } from './_utils/dtos/requests/create-restaurant.dt
 import { FindRestaurantsDto } from './_utils/dtos/requests/find-restaurants.dto.js';
 import { UpdateRestaurantDto } from './_utils/dtos/requests/update-restaurant.dto.js';
 import { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.response.dto.js';
-import { ParseRestaurantPipe } from './_utils/pipes/parse-restaurant.pipe.js';
-import type { RestaurantDetails } from './_utils/types/restaurant-details.type.js';
+import { RestaurantWithMenuResponseDto } from './_utils/dtos/responses/restaurant-with-menu.response.dto.js';
 import { RestaurantsService } from './restaurants.service.js';
 
 @ApiTags(RESTAURANTS_TAG)
@@ -43,7 +46,7 @@ import { RestaurantsService } from './restaurants.service.js';
 export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Post()
   @ApiOperation({ summary: 'Create a restaurant' })
   @ApiCreatedResponse({ type: RestaurantResponseDto })
@@ -74,16 +77,16 @@ export class RestaurantsController {
   @Get(RESTAURANT_ID_ROUTE)
   @ApiOperation({ summary: 'Get a restaurant with its menu' })
   @ApiParam({ name: RESTAURANT_ID_PARAM, format: 'uuid' })
-  @ApiOkResponse({ type: RestaurantResponseDto })
+  @ApiOkResponse({ type: RestaurantWithMenuResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid restaurant id' })
   @ApiNotFoundResponse({ description: 'Restaurant not found' })
-  findRestaurant(
-    @Param(RESTAURANT_ID_PARAM, ParseRestaurantPipe) restaurant: RestaurantDetails,
-  ): RestaurantResponseDto {
-    return this.restaurantsService.findRestaurant(restaurant);
+  async findRestaurant(
+    @Param(RESTAURANT_ID_PARAM, getEntityByIdPipe('restaurant')) restaurant: Selectable<Restaurant>,
+  ): Promise<RestaurantWithMenuResponseDto> {
+    return await this.restaurantsService.findRestaurant(restaurant);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Patch(RESTAURANT_ID_ROUTE)
   @ApiOperation({ summary: 'Update a restaurant' })
   @ApiParam({ name: RESTAURANT_ID_PARAM, format: 'uuid' })
@@ -92,13 +95,13 @@ export class RestaurantsController {
   @ApiNotFoundResponse({ description: 'Restaurant not found' })
   @ApiConflictResponse({ description: 'Menu does not exist' })
   async updateRestaurant(
-    @Param(RESTAURANT_ID_PARAM, ParseRestaurantPipe) restaurant: RestaurantDetails,
+    @Param(RESTAURANT_ID_PARAM, getEntityByIdPipe('restaurant')) restaurant: Selectable<Restaurant>,
     @Body() updateRestaurantDto: UpdateRestaurantDto,
   ): Promise<RestaurantResponseDto> {
     return await this.restaurantsService.updateRestaurant(restaurant, updateRestaurantDto);
   }
 
-  @Protect()
+  @Protect({ roles: [USER_ROLES.ADMIN] })
   @Delete(RESTAURANT_ID_ROUTE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a restaurant' })
@@ -108,7 +111,7 @@ export class RestaurantsController {
   @ApiNotFoundResponse({ description: 'Restaurant not found' })
   @ApiConflictResponse({ description: 'Restaurant used by a session' })
   async deleteRestaurant(
-    @Param(RESTAURANT_ID_PARAM, ParseRestaurantPipe) restaurant: RestaurantDetails,
+    @Param(RESTAURANT_ID_PARAM, getEntityByIdPipe('restaurant')) restaurant: Selectable<Restaurant>,
   ): Promise<void> {
     await this.restaurantsService.deleteRestaurant(restaurant);
   }
