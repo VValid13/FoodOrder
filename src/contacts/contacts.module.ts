@@ -11,7 +11,14 @@ import { ContactMapper } from './contacts.mapper.js';
 
 @Module({
   imports: [forwardRef(() => JwtModule), EncryptionModule],
-  providers: [ContactService, ContactRepository, ContactMapper, UserMapper, UsersService, UsersRepository],
+  providers: [
+    ContactService,
+    ContactRepository,
+    ContactMapper,
+    UserMapper,
+    UsersService,
+    UsersRepository,
+  ],
   //exports: [ContactService],
   controllers: [ContactsController],
 })
