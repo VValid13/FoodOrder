@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { PipeTransform, Type } from '@nestjs/common';
-import { Kysely, sql } from 'kysely';
+import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../../database/database.types.js';
 import { NOT_FOUND_MESSAGE_SUFFIX } from '../constants/get-entity-by-id.constants.js';
 import { InjectKysely } from '../decorators/inject-kysely.decorator.js';
@@ -21,11 +21,12 @@ export function getEntityByIdPipe<TTable extends TableWithId>(
         throw UUIDFormatException;
       }
 
-      const [entity] = (
-        await sql<TableRow<TTable>>`select * from ${sql.table(table)} where id = ${value}`.execute(
-          this.db,
-        )
-      ).rows;
+      const entity = await this.db
+        .selectFrom(this.db.dynamic.table(table).as('entity'))
+        .selectAll()
+        .where(this.db.dynamic.ref('entity.id'), '=', value)
+        .$castTo<TableRow<TTable>>()
+        .executeTakeFirst();
 
       if (!entity) {
         throw new NotFoundException(
