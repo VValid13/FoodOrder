@@ -75,7 +75,7 @@ export class ContactsController {
   ) {
     console.log(`patch from ${groupLabelDto.oldLabel} to ${groupLabelDto.newLabel}`)
     if(!groupLabelDto.oldLabel){throw new KyselyError('404', "group not found")}
-    return await this.contactService.renameGroup(userId, groupLabelDto.oldLabel, groupLabelDto.newLabel);
+    await this.contactService.renameGroup(userId, groupLabelDto.oldLabel, groupLabelDto.newLabel);
   }
 
   @Delete('')

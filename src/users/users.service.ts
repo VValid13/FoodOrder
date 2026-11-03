@@ -46,6 +46,9 @@ export class UsersService {
   getUser = (user: UserEntity): GetUserDto => this.userMapper.toGetUserDto(user);
 
   async updateSelfUsername(changeUsernameDto: UpdateUserDto, userId: UUID) {
-    await this.userRepository.updateUsername(changeUsernameDto, userId);
+    await this.userRepository.updateUsername(
+      this.userMapper.formatUsername(changeUsernameDto.username),
+      userId
+    );
   }
 }
