@@ -22,9 +22,11 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Selectable } from 'kysely';
 import { USER_ROLES } from '../_utils/constants/user-role.constants.js';
-import { ParseEntityPipe } from '../_utils/pipes/parse-entity.pipe.js';
+import { getEntityByIdPipe } from '../_utils/pipes/get-entity-by-id.pipe.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
+import type { Restaurant } from '../database/database.types.js';
 import {
   RESTAURANT_ID_PARAM,
   RESTAURANT_ID_ROUTE,
@@ -37,11 +39,7 @@ import { FindRestaurantsDto } from './_utils/dtos/requests/find-restaurants.dto.
 import { UpdateRestaurantDto } from './_utils/dtos/requests/update-restaurant.dto.js';
 import { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.response.dto.js';
 import { RestaurantWithMenuResponseDto } from './_utils/dtos/responses/restaurant-with-menu.response.dto.js';
-import type { RestaurantDetails } from './_utils/types/restaurant-details.type.js';
-import { RestaurantsRepository } from './restaurants.repository.js';
 import { RestaurantsService } from './restaurants.service.js';
-
-const ParseRestaurantPipe = ParseEntityPipe(RestaurantsRepository, 'findRestaurantByIdOrFail');
 
 @ApiTags(RESTAURANTS_TAG)
 @Controller(RESTAURANTS_ROUTE)
@@ -83,7 +81,7 @@ export class RestaurantsController {
   @ApiBadRequestResponse({ description: 'Invalid restaurant id' })
   @ApiNotFoundResponse({ description: 'Restaurant not found' })
   async findRestaurant(
-    @Param(RESTAURANT_ID_PARAM, ParseRestaurantPipe) restaurant: RestaurantDetails,
+    @Param(RESTAURANT_ID_PARAM, getEntityByIdPipe('restaurant')) restaurant: Selectable<Restaurant>,
   ): Promise<RestaurantWithMenuResponseDto> {
     return await this.restaurantsService.findRestaurant(restaurant);
   }
@@ -97,7 +95,7 @@ export class RestaurantsController {
   @ApiNotFoundResponse({ description: 'Restaurant not found' })
   @ApiConflictResponse({ description: 'Menu does not exist' })
   async updateRestaurant(
-    @Param(RESTAURANT_ID_PARAM, ParseRestaurantPipe) restaurant: RestaurantDetails,
+    @Param(RESTAURANT_ID_PARAM, getEntityByIdPipe('restaurant')) restaurant: Selectable<Restaurant>,
     @Body() updateRestaurantDto: UpdateRestaurantDto,
   ): Promise<RestaurantResponseDto> {
     return await this.restaurantsService.updateRestaurant(restaurant, updateRestaurantDto);
@@ -113,7 +111,7 @@ export class RestaurantsController {
   @ApiNotFoundResponse({ description: 'Restaurant not found' })
   @ApiConflictResponse({ description: 'Restaurant used by a session' })
   async deleteRestaurant(
-    @Param(RESTAURANT_ID_PARAM, ParseRestaurantPipe) restaurant: RestaurantDetails,
+    @Param(RESTAURANT_ID_PARAM, getEntityByIdPipe('restaurant')) restaurant: Selectable<Restaurant>,
   ): Promise<void> {
     await this.restaurantsService.deleteRestaurant(restaurant);
   }

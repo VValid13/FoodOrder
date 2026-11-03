@@ -20,9 +20,10 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Selectable } from 'kysely';
 import type { UUID } from 'node:crypto';
 import { USER_ROLES } from '../_utils/constants/user-role.constants.js';
-import { ParseEntityPipe } from '../_utils/pipes/parse-entity.pipe.js';
+import { getEntityByIdPipe } from '../_utils/pipes/get-entity-by-id.pipe.js';
 import { ParseUuidPipe } from '../_utils/pipes/parse-uuid.pipe.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import {
@@ -39,11 +40,8 @@ import { CreateMenuDto } from './_utils/dtos/requests/create-menu.dto.js';
 import { UpdateDishDto } from './_utils/dtos/requests/update-dish.dto.js';
 import { UpdateMenuDto } from './_utils/dtos/requests/update-menu.dto.js';
 import { MenuResponseDto } from './_utils/dtos/responses/menu.response.dto.js';
-import type { MenuDetails } from './_utils/types/menu-details.type.js';
-import { MenusRepository } from './menus.repository.js';
+import type { Menu } from '../database/database.types.js';
 import { MenusService } from './menus.service.js';
-
-const ParseMenuPipe = ParseEntityPipe(MenusRepository, 'findMenuByIdOrFail');
 
 @ApiTags(MENUS_TAG)
 @Controller(MENUS_ROUTE)
@@ -74,8 +72,10 @@ export class MenusController {
   @ApiOkResponse({ type: MenuResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid menu id' })
   @ApiNotFoundResponse({ description: 'Menu not found' })
-  findMenu(@Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails): MenuResponseDto {
-    return this.menusService.findMenu(menu);
+  async findMenu(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+  ): Promise<MenuResponseDto> {
+    return await this.menusService.findMenuById(menu.id);
   }
 
   @Protect({ roles: [USER_ROLES.ADMIN] })
@@ -86,7 +86,7 @@ export class MenusController {
   @ApiBadRequestResponse({ description: 'Invalid menu id or body' })
   @ApiNotFoundResponse({ description: 'Menu not found' })
   async updateMenu(
-    @Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails,
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
     @Body() updateMenuDto: UpdateMenuDto,
   ): Promise<MenuResponseDto> {
     return await this.menusService.updateMenu(menu, updateMenuDto);
@@ -101,7 +101,9 @@ export class MenusController {
   @ApiBadRequestResponse({ description: 'Invalid menu id' })
   @ApiNotFoundResponse({ description: 'Menu not found' })
   @ApiConflictResponse({ description: 'Menu used by a restaurant or dish already ordered' })
-  async deleteMenu(@Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails): Promise<void> {
+  async deleteMenu(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+  ): Promise<void> {
     await this.menusService.deleteMenu(menu);
   }
 
@@ -113,7 +115,7 @@ export class MenusController {
   @ApiBadRequestResponse({ description: 'Invalid menu id or body' })
   @ApiNotFoundResponse({ description: 'Menu not found' })
   async createDish(
-    @Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails,
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
     @Body() createDishDto: CreateDishDto,
   ): Promise<MenuResponseDto> {
     return await this.menusService.createDish(menu, createDishDto);
@@ -129,7 +131,7 @@ export class MenusController {
   @ApiNotFoundResponse({ description: 'Menu or dish not found' })
   @ApiConflictResponse({ description: 'Options of an already ordered dish cannot be replaced' })
   async updateDish(
-    @Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails,
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
     @Param(DISH_ID_PARAM, ParseUuidPipe) dishId: UUID,
     @Body() updateDishDto: UpdateDishDto,
   ): Promise<MenuResponseDto> {
@@ -146,7 +148,7 @@ export class MenusController {
   @ApiBadRequestResponse({ description: 'Invalid ids' })
   @ApiNotFoundResponse({ description: 'Menu or dish not found' })
   async deleteDish(
-    @Param(MENU_ID_PARAM, ParseMenuPipe) menu: MenuDetails,
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
     @Param(DISH_ID_PARAM, ParseUuidPipe) dishId: UUID,
   ): Promise<void> {
     await this.menusService.deleteDish(menu, dishId);

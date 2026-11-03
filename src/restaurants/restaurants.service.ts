@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import type { Selectable } from 'kysely';
 import type { UUID } from 'node:crypto';
+import type { Restaurant } from '../database/database.types.js';
 import { MenusService } from '../menus/menus.service.js';
 import { PlacesService } from '../places/places.service.js';
 import type { CreateRestaurantDto } from './_utils/dtos/requests/create-restaurant.dto.js';
@@ -9,7 +11,6 @@ import type { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.r
 import type { RestaurantWithMenuResponseDto } from './_utils/dtos/responses/restaurant-with-menu.response.dto.js';
 import { RestaurantMapper } from './_utils/mappers/restaurant.mapper.js';
 import type { NewRestaurant } from './_utils/types/new-restaurant.type.js';
-import type { RestaurantDetails } from './_utils/types/restaurant-details.type.js';
 import { RestaurantsRepository } from './restaurants.repository.js';
 
 @Injectable()
@@ -45,9 +46,12 @@ export class RestaurantsService {
     );
   }
 
-  async findRestaurant(restaurant: RestaurantDetails): Promise<RestaurantWithMenuResponseDto> {
+  async findRestaurant(restaurant: Selectable<Restaurant>): Promise<RestaurantWithMenuResponseDto> {
+    const restaurantDetails = await this.restaurantsRepository.findRestaurantByIdOrFail(
+      restaurant.id,
+    );
     const menu = restaurant.menuId ? await this.menusService.findMenuById(restaurant.menuId) : null;
-    return this.restaurantMapper.toResponseWithMenu(restaurant, menu);
+    return this.restaurantMapper.toResponseWithMenu(restaurantDetails, menu);
   }
 
   private async importRestaurants(
@@ -62,7 +66,7 @@ export class RestaurantsService {
   }
 
   async updateRestaurant(
-    restaurant: RestaurantDetails,
+    restaurant: Selectable<Restaurant>,
     { openingHours, ...updateRestaurantDto }: UpdateRestaurantDto,
   ): Promise<RestaurantResponseDto> {
     await this.restaurantsRepository.updateRestaurant(
@@ -73,7 +77,7 @@ export class RestaurantsService {
     return await this.findResponseById(restaurant.id);
   }
 
-  async deleteRestaurant(restaurant: RestaurantDetails): Promise<void> {
+  async deleteRestaurant(restaurant: Selectable<Restaurant>): Promise<void> {
     await this.restaurantsRepository.deleteRestaurant(restaurant.id);
   }
 
