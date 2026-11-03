@@ -14,7 +14,7 @@ export class ContactService {
     private readonly userService: UsersService,
     private readonly userMapper: UserMapper,
   ) {}
-  async getMyLists(ownerId: UUID) {
+  async getMyGroups(ownerId: UUID) {
     return await this.contactRepository.findListByOwnerId(ownerId);
   }
 
@@ -67,7 +67,7 @@ export class ContactService {
     return await this.contactRepository.updateGroupLabel(ownerId, oldLabel, newLabel);
   }
 
-  async patchList() {}
-
-  async delestList() {}
+  async delestGroup(ownerId: UUID, groupLabel: string) {
+    return await this.contactRepository.deleteGroupByLabel(ownerId, groupLabel);
+  }
 }

@@ -53,4 +53,13 @@ export class ContactRepository {
       .where('userGroupMember.userGroupId', '=', groupId)
       .execute();
   }
+
+  async deleteGroupByLabel(ownerId: UUID, groupLabel: string){
+    console.log("owner id: "+ownerId)
+    return await this.db
+    .deleteFrom('userGroup')
+    .where("ownerId",'=',ownerId)
+    .where("label", "=",groupLabel)
+    .executeTakeFirstOrThrow()
+  }
 }

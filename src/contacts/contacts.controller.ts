@@ -13,14 +13,15 @@ import { KyselyError } from '../_utils/kysely.error.js';
 export class ContactsController {
   constructor(
     private readonly contactService: ContactService,
-    //private readonly userMapper: UserMapper,
   ) {}
 
   @Protect()
   @Get('')
   @ApiOperation({ summary: 'Get all owned group' })
-  async getMyLists(@GetUserPropertyInPayload() userId: crypto.UUID) {
-    return await this.contactService.getMyLists(userId);
+  async getMyGroups(
+    @GetUserPropertyInPayload() userId: crypto.UUID
+  ) {
+    return await this.contactService.getMyGroups(userId);
   }
 
   @Protect()
@@ -73,13 +74,19 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: crypto.UUID,
     @Body() groupLabelDto: GroupLabelRequestDto,
   ) {
-    console.log(`patch from ${groupLabelDto.oldLabel} to ${groupLabelDto.newLabel}`)
     if(!groupLabelDto.oldLabel){throw new KyselyError('404', "group not found")}
     await this.contactService.renameGroup(userId, groupLabelDto.oldLabel, groupLabelDto.newLabel);
   }
 
-  @Delete('')
-  @ApiParam({ type: 'UUID', name: 'userId' })
-  @ApiOperation({ summary: 'Delete group by id' })
-  async delestList() {}
+  @Protect()
+  @Delete('/:label')
+  @ApiParam({ type: 'string', name: 'label' })
+  @ApiOperation({ summary: 'Delete group by label' })
+  async delestList(
+    @GetUserPropertyInPayload() userId: crypto.UUID,
+    @Param('label') groupLabel: string,
+  ) {
+    const result = await this.contactService.delestGroup(userId, groupLabel);
+    console.log("result:\n"+result.numDeletedRows)
+  }
 }
