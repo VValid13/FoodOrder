@@ -23,6 +23,17 @@ export class ContactRepository {
       .executeTakeFirstOrThrow();
   }
 
+  async updateGroupLabel(userId: UUID, oldLabel: string, newLabel: string){
+    return await this.db
+    .updateTable('userGroup')
+    .set({
+      label: newLabel
+    })
+    .where('label','=',oldLabel)
+    .where('ownerId','=',userId)
+    .executeTakeFirstOrThrow()
+  }
+
   async addMember(groupId: UUID, newUserId: UUID) {
     return await this.db
       .insertInto('userGroupMember')

@@ -63,6 +63,10 @@ export class ContactService {
     return await this.contactRepository.createEmptyGroup(newGroup);
   }
 
+  async renameGroup(ownerId: UUID, oldLabel: string, newLabel: string) {
+    return await this.contactRepository.updateGroupLabel(ownerId, oldLabel, newLabel);
+  }
+
   async patchList() {}
 
   async delestList() {}

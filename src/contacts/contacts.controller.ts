@@ -6,6 +6,7 @@ import { GetUserPropertyInPayload } from '../_utils/decorators/connected-user-de
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import { GroupLabelRequestDto } from './_utils/dtos/requests/group-label.request.dto.js';
 import { MemberUsernameRequestDto } from './_utils/dtos/requests/member-username.request.dto.js';
+import { KyselyError } from '../_utils/kysely.error.js';
 
 @ApiTags('contact-lists')
 @Controller('contact-lists')
@@ -25,12 +26,11 @@ export class ContactsController {
   @Protect()
   @Post('')
   @ApiOperation({ summary: 'create new empty group with defined label' })
-  @ApiBody({ type: GroupLabelRequestDto })
   async createList(
     @GetUserPropertyInPayload() userId: crypto.UUID,
     @Body() groupLabelDto: GroupLabelRequestDto,
   ) {
-    await this.contactService.createGroup(userId, groupLabelDto.label);
+    await this.contactService.createGroup(userId, groupLabelDto.newLabel);
   }
 
   @Protect()
@@ -66,11 +66,16 @@ export class ContactsController {
     console.log("@Patch('/:id/members/:memberId')");
   }
 
+  @Protect()
   @Patch('')
-  @ApiParam({ type: 'UUID', name: 'userId' })
-  @ApiOperation({ summary: 'Get all owned lists' })
-  async patchList() {
-    console.log("@Patch('')");
+  @ApiOperation({ summary: 'update group label' })
+  async renameGroup(
+    @GetUserPropertyInPayload() userId: crypto.UUID,
+    @Body() groupLabelDto: GroupLabelRequestDto,
+  ) {
+    console.log(`patch from ${groupLabelDto.oldLabel} to ${groupLabelDto.newLabel}`)
+    if(!groupLabelDto.oldLabel){throw new KyselyError('404', "group not found")}
+    return await this.contactService.renameGroup(userId, groupLabelDto.oldLabel, groupLabelDto.newLabel);
   }
 
   @Delete('')
