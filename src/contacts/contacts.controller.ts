@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Patch, Delete, Param } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import * as crypto from 'crypto';
 import { ContactService } from './contacts.service.js';
 import { GetUserPropertyInPayload } from '../_utils/decorators/connected-user-decorator.js';
@@ -11,16 +11,12 @@ import { KyselyError } from '../_utils/kysely.error.js';
 @ApiTags('contact-lists')
 @Controller('contact-lists')
 export class ContactsController {
-  constructor(
-    private readonly contactService: ContactService,
-  ) {}
+  constructor(private readonly contactService: ContactService) {}
 
   @Protect()
   @Get('')
   @ApiOperation({ summary: 'Get all owned group' })
-  async getMyGroups(
-    @GetUserPropertyInPayload() userId: crypto.UUID
-  ) {
+  async getMyGroups(@GetUserPropertyInPayload() userId: crypto.UUID) {
     return await this.contactService.getMyGroups(userId);
   }
 
@@ -74,7 +70,9 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: crypto.UUID,
     @Body() groupLabelDto: GroupLabelRequestDto,
   ) {
-    if(!groupLabelDto.oldLabel){throw new KyselyError('404', "group not found")}
+    if (!groupLabelDto.oldLabel) {
+      throw new KyselyError('404', 'group not found');
+    }
     await this.contactService.renameGroup(userId, groupLabelDto.oldLabel, groupLabelDto.newLabel);
   }
 
@@ -86,7 +84,6 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: crypto.UUID,
     @Param('label') groupLabel: string,
   ) {
-    const result = await this.contactService.delestGroup(userId, groupLabel);
-    console.log("result:\n"+result.numDeletedRows)
+    return await this.contactService.delestGroup(userId, groupLabel);
   }
 }

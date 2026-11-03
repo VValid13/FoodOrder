@@ -7,5 +7,5 @@ export class MemberUsernameRequestDto {
     example: 'FriendUser',
   })
   @IsNotEmptyString()
-  username: string
+  username: string;
 }

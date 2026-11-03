@@ -4,7 +4,6 @@ import { Kysely } from 'kysely';
 import type { DatabaseTables } from '../database/database.types.js';
 import { UUID } from 'crypto';
 import { UserEntity } from './users.entity.js';
-import { UpdateUserDto } from './_utils/dtos/requests/update-user.dto.js';
 
 @Injectable()
 export class UsersRepository {

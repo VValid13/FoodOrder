@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { Kysely } from 'kysely';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
-import { DatabaseTables, User } from '../database/database.types.js';
+import { DatabaseTables } from '../database/database.types.js';
 import { ContactEntity } from './contacts.entity.js';
 import { UserEntity } from '../users/users.entity.js';
 
@@ -23,15 +23,15 @@ export class ContactRepository {
       .executeTakeFirstOrThrow();
   }
 
-  async updateGroupLabel(userId: UUID, oldLabel: string, newLabel: string){
+  async updateGroupLabel(userId: UUID, oldLabel: string, newLabel: string) {
     return await this.db
-    .updateTable('userGroup')
-    .set({
-      label: newLabel
-    })
-    .where('label','=',oldLabel)
-    .where('ownerId','=',userId)
-    .executeTakeFirstOrThrow()
+      .updateTable('userGroup')
+      .set({
+        label: newLabel,
+      })
+      .where('label', '=', oldLabel)
+      .where('ownerId', '=', userId)
+      .executeTakeFirstOrThrow();
   }
 
   async addMember(groupId: UUID, newUserId: UUID) {
@@ -54,12 +54,11 @@ export class ContactRepository {
       .execute();
   }
 
-  async deleteGroupByLabel(ownerId: UUID, groupLabel: string){
-    console.log("owner id: "+ownerId)
+  async deleteGroupByLabel(ownerId: UUID, groupLabel: string) {
     return await this.db
-    .deleteFrom('userGroup')
-    .where("ownerId",'=',ownerId)
-    .where("label", "=",groupLabel)
-    .executeTakeFirstOrThrow()
+      .deleteFrom('userGroup')
+      .where('ownerId', '=', ownerId)
+      .where('label', '=', groupLabel)
+      .executeTakeFirstOrThrow();
   }
 }

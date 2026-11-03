@@ -5,9 +5,9 @@ import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-str
 export class GroupLabelRequestDto {
   @ApiProperty({ description: 'optional old label value', example: 'NewGroupName' })
   @Optional()
-  oldLabel: string
-  
+  oldLabel: string;
+
   @ApiProperty({ description: 'new label value', example: 'NewGroupName' })
   @IsNotEmptyString()
-  newLabel: string
+  newLabel: string;
 }

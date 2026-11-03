@@ -48,7 +48,7 @@ export class UsersService {
   async updateSelfUsername(changeUsernameDto: UpdateUserDto, userId: UUID) {
     await this.userRepository.updateUsername(
       this.userMapper.formatUsername(changeUsernameDto.username),
-      userId
+      userId,
     );
   }
 }
