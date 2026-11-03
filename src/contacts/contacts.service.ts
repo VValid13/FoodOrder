@@ -56,7 +56,17 @@ export class ContactService {
     );
   }
 
-  async patchUsersInList() {}
+  async deleteUserFromGroup(ownerId: UUID, groupLabel: string, toDeleteUsername: string) {
+    const ownedGroups = await this.contactRepository.findListByOwnerId(ownerId);
+    const group = ownedGroups.find((c) => c.label === groupLabel);
+    const toRemoveUser = await this.userService.getUserByUsername(
+      this.userMapper.formatUsername(toDeleteUsername),
+    );
+    if (!group) {
+      throw new KyselyError('404', 'label not found in owned groups');
+    }
+    return await this.contactRepository.DeleteUserInGroup(group.id, toRemoveUser.id);
+  }
 
   async createGroup(ownerId: UUID, label: string) {
     const newGroup = this.contactMapper.toNewGroup(ownerId, label);

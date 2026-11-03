@@ -57,10 +57,16 @@ export class ContactsController {
     );
   }
 
-  @Patch('/:id/members/:memberId')
-  @ApiOperation({ summary: 'Patch member in list' })
-  async patchUsersInList() {
-    console.log("@Patch('/:id/members/:memberId')");
+  @Protect()
+  @Delete('/:label/members')
+  @ApiParam({ type: 'UUID', name: 'memberUSername' })
+  @ApiOperation({ summary: 'Remove member from group' })
+  async deleteUsersInList(
+    @GetUserPropertyInPayload() ownerId: crypto.UUID,
+    @Param('label') groupLabel: string,
+    @Body() memberUsernameDto: MemberUsernameRequestDto,
+  ) {
+    await this.contactService.deleteUserFromGroup(ownerId, groupLabel, memberUsernameDto.username);
   }
 
   @Protect()
@@ -84,6 +90,6 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: crypto.UUID,
     @Param('label') groupLabel: string,
   ) {
-    return await this.contactService.delestGroup(userId, groupLabel);
+    await this.contactService.delestGroup(userId, groupLabel);
   }
 }

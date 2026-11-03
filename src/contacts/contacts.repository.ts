@@ -61,4 +61,12 @@ export class ContactRepository {
       .where('label', '=', groupLabel)
       .executeTakeFirstOrThrow();
   }
+
+  async DeleteUserInGroup(groupId: UUID, toDeleteUserId: UUID) {
+    return await this.db
+      .deleteFrom('userGroupMember')
+      .where('userGroupId', '=', groupId)
+      .where('userId', '=', toDeleteUserId)
+      .executeTakeFirstOrThrow();
+  }
 }
