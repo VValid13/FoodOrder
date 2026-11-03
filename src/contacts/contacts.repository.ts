@@ -5,6 +5,7 @@ import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import { DatabaseTables, User } from '../database/database.types.js';
 import { ContactEntity } from './contacts.entity.js';
 import { group } from 'console';
+import { UserEntity } from '../users/users.entity.js';
 
 @Injectable()
 export class ContactRepository {
@@ -38,22 +39,12 @@ export class ContactRepository {
     .executeTakeFirstOrThrow()
   }
 
-  async getGroupMembers(ownerId: UUID,groupId: UUID){
+  async getGroupMembers(groupId: UUID): Promise<UserEntity[]>{
     return await this.db
     .selectFrom('user')
     .selectAll()
-    .innerJoin('userGroup', 'userGroup.id', 'user.id')
-    .where('userGroup.id', '=', groupId)
+    .innerJoin('userGroupMember', 'userGroupMember.userId', 'user.id')
+    .where('userGroupMember.userGroupId', '=', groupId)
     .execute()
   }
-  /*
-  async createList(userInfos: UserEntity) {
-    return await this.db
-      .insertInto('user')
-      .values({
-        ...userInfos,
-      })
-      .executeTakeFirstOrThrow();
-  }
-  */
 }

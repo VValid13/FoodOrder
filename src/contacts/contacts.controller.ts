@@ -24,18 +24,60 @@ export class ContactsController {
   @Protect()
   @Post('')
   @ApiOperation({ summary: 'create new empty group' })
-  async createList(@GetUserPropertyInPayload() userId: crypto.UUID) {
-    await this.contactService.createGroup(userId);
+  async createList(
+    @GetUserPropertyInPayload() userId: crypto.UUID,
+    @Body() label :{label: string}
+  ) {
+    await this.contactService.createGroup(userId, label.label);
   }    
 
+  /*
   @Get('/:id/members')
   @ApiParam({ type: 'UUID', name: 'groupId' })
   @ApiOperation({ summary: 'Get all members in list' })
-  async getUsersInList(
+  async getUsersInGroupById(
     @GetUserPropertyInPayload() ownerId: crypto.UUID,
     @Param('id') groupId: crypto.UUID
   ) {
-   return await this.contactService.getUsersInList(ownerId, groupId);
+    return await this.contactService.getUsersInGroupById(ownerId, groupId);
+  }
+  */
+
+  @Protect()
+  @Get('/:label/members')
+  @ApiParam({ type: 'UUID', name: 'groupId' })
+  @ApiOperation({ summary: 'Get all members in list' })
+  async getUsersInGroupByLabel(
+    @GetUserPropertyInPayload() ownerId: crypto.UUID,
+    @Param('label') groupLabel: string
+  ) {
+   return await this.contactService.getUsersInGroupByLabel(ownerId, groupLabel);
+  }
+ /*
+ @Protect()
+ @Post('/:id/members')
+ @ApiParam({ type: 'UUID', name: 'groupId' })
+ @ApiOperation({ summary: 'Get all members in list' })
+ async addUser(
+  @GetUserPropertyInPayload() ownerId: crypto.UUID,
+  @Param('id') groupId: crypto.UUID,
+  @Body() invitedUser: {username: string}
+  ) {
+    console.log('by id')
+    return await this.contactService.addUserInGroup(ownerId, groupId, invitedUser.username);
+  }
+  */
+
+  @Protect()
+  @Post('/:label/members')
+  @ApiParam({ type: 'UUID', name: 'groupId' })
+  @ApiOperation({ summary: 'Get all members in list' })
+  async addUserInGroupByLabel(
+    @GetUserPropertyInPayload() ownerId: crypto.UUID,
+    @Param('label') groupLabel: string,
+    @Body() invitedUser: {username: string}
+  ) {
+    await this.contactService.addUserInGroupByLabel(ownerId, groupLabel, invitedUser.username);
   }
 
   @Patch('/:id/members/:memberId')
