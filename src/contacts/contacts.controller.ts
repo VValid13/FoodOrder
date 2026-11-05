@@ -14,14 +14,14 @@ export class ContactsController {
   constructor(private readonly contactService: ContactService) {}
 
   @Protect()
-  @Get('')
+  @Get()
   @ApiOperation({ summary: 'Get all owned group' })
   async getMyGroups(@GetUserPropertyInPayload() userId: UUID) {
     return await this.contactService.getMyGroups(userId);
   }
 
   @Protect()
-  @Post('')
+  @Post()
   @ApiOperation({ summary: 'create new empty group with defined label' })
   async createList(
     @GetUserPropertyInPayload() userId: UUID,
@@ -67,7 +67,7 @@ export class ContactsController {
   }
 
   @Protect()
-  @Patch('')
+  @Patch()
   @ApiOperation({ summary: 'update group label' })
   async renameGroup(
     @GetUserPropertyInPayload() userId: UUID,
