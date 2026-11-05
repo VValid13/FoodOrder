@@ -2,20 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
 import { type UUID } from 'crypto';
 import { UserEntity } from '../users/users.entity.js';
-import { UserMapper } from '../users/users.mapper.js';
-import { ContactRepository } from './contacts.repository.js';
-import { KyselyError } from '../_utils/kysely.error.js';
+//import { UserMapper } from '../users/users.mapper.js';
+import { ContactEntity } from './contacts.entity.js';
+import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.dto.js';
 
 @Injectable()
 export class ContactMapper {
   constructor(
-    private readonly contactRepository: ContactRepository,
-    private readonly userMapper: UserMapper,
+    //private readonly userMapper: UserMapper,
   ) {}
 
   toGroupMemberDto = (members: UserEntity[]): GroupMembersResponseDto => {
-    return { users: members.map((e: UserEntity) => this.userMapper.toGetUserDto(e)) };
+    return { users: members.map((e: UserEntity) => ({id: e.id, username: e.username}))};//this.userMapper.toGetUserDto(e)) };
   };
+
+  toGroupsDto = (entityGroups: ContactEntity[]): MyGroupsResponseDto => {
+    return { groups: entityGroups.map((e: ContactEntity) => ({groupId: e.id, groupLabel: e.label}))};
+  }
 
   toNewGroup = (id: UUID, label: string) => {
     return {
@@ -27,12 +30,4 @@ export class ContactMapper {
     };
   };
 
-  toGroupId = async (ownerId: UUID, groupLabel: string): Promise<UUID> => {
-    const ownedGroups = await this.contactRepository.findListByOwnerId(ownerId);
-    const group = ownedGroups.find((c) => c.label === groupLabel);
-    if (!group) {
-      throw new KyselyError('403', 'label not found in owned groups');
-    }
-    return group.id;
-  };
 }

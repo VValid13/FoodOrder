@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
+import { type UUID } from 'crypto';
+import { IsUUID } from 'class-validator';
 
-export class MemberUsernameRequestDto {
+export class MemberRequestDto {
   @ApiProperty({
-    description: 'the username of the user to invite in group',
+    description: 'the id of the user to invite in group',
     example: 'FriendUser',
   })
-  @IsNotEmptyString()
-  username: string;
+  @IsUUID()
+  id: UUID;
 }
