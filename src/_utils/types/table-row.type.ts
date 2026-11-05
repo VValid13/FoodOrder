@@ -1,4 +1,5 @@
 import type { Selectable } from 'kysely';
+import type { UUID } from 'node:crypto';
 import type { DatabaseTables } from '../../database/database.types.js';
 
 export type TableWithId = {
@@ -7,6 +8,11 @@ export type TableWithId = {
 
 export type TableRow<TTable extends TableWithId> = Selectable<DatabaseTables[TTable]>;
 
-export type GetEntityByIdOptions = {
+export type UuidColumn<TTable extends TableWithId> = {
+  [TColumn in keyof TableRow<TTable>]: TableRow<TTable>[TColumn] extends UUID ? TColumn : never;
+}[keyof TableRow<TTable>];
+
+export type GetEntityByIdOptions<TTable extends TableWithId> = {
   notFoundMessage?: string;
+  ownerProperty?: UuidColumn<TTable>;
 };

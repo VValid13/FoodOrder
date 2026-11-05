@@ -11,6 +11,7 @@ import type { RestaurantResponseDto } from './_utils/dtos/responses/restaurant.r
 import type { RestaurantWithMenuResponseDto } from './_utils/dtos/responses/restaurant-with-menu.response.dto.js';
 import { RestaurantMapper } from './_utils/mappers/restaurant.mapper.js';
 import type { NewRestaurant } from './_utils/types/new-restaurant.type.js';
+import type { RestaurantSchedule } from './_utils/types/restaurant-schedule.type.js';
 import { RestaurantsRepository } from './restaurants.repository.js';
 
 @Injectable()
@@ -52,6 +53,12 @@ export class RestaurantsService {
     );
     const menu = restaurant.menuId ? await this.menusService.findMenuById(restaurant.menuId) : null;
     return this.restaurantMapper.toResponseWithMenu(restaurantDetails, menu);
+  }
+
+  async findRestaurantSchedule(restaurantId: UUID): Promise<RestaurantSchedule> {
+    return this.restaurantMapper.toSchedule(
+      await this.restaurantsRepository.findRestaurantByIdOrFail(restaurantId),
+    );
   }
 
   private async importRestaurants(

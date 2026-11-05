@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { MenusModule } from './menus/menus.module.js';
 import { RestaurantsModule } from './restaurants/restaurants.module.js';
+import { SessionsModule } from './sessions/sessions.module.js';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RestaurantsModule } from './restaurants/restaurants.module.js';
     AuthModule,
     RestaurantsModule,
     MenusModule,
+    SessionsModule,
   ],
 })
 export class AppModule {}
