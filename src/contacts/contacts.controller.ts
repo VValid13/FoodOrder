@@ -33,7 +33,7 @@ export class ContactsController {
   @Protect()
   @Get('/:label/members')
   @ApiParam({ type: 'string', name: 'label' })
-  @ApiOperation({ summary: 'Get all members in list' })
+  @ApiOperation({ summary: 'Get all members in group' })
   async getUsersInGroupByLabel(
     @GetUserPropertyInPayload() ownerId: crypto.UUID,
     @Param('label') groupLabel: string,
@@ -50,11 +50,7 @@ export class ContactsController {
     @Param('label') groupLabel: string,
     @Body() memberUsernameDto: MemberUsernameRequestDto,
   ) {
-    await this.contactService.addUserInGroupByLabel(
-      ownerId,
-      groupLabel,
-      memberUsernameDto.username,
-    );
+    await this.contactService.addUserInGroup(ownerId, groupLabel, memberUsernameDto.username);
   }
 
   @Protect()
@@ -90,6 +86,6 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: crypto.UUID,
     @Param('label') groupLabel: string,
   ) {
-    await this.contactService.delestGroup(userId, groupLabel);
+    await this.contactService.deletGroup(userId, groupLabel);
   }
 }

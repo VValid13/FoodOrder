@@ -3,8 +3,8 @@ import { ContactRepository } from './contacts.repository.js';
 import { UUID } from 'crypto';
 import { UserMapper } from '../users/users.mapper.js';
 import { UsersService } from '../users/users.service.js';
-import { KyselyError } from '../_utils/kysely.error.js';
 import { ContactMapper } from './contacts.mapper.js';
+import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
 
 @Injectable()
 export class ContactService {
@@ -18,54 +18,35 @@ export class ContactService {
     return await this.contactRepository.findListByOwnerId(ownerId);
   }
 
-  async getUsersInGroupByLabel(ownerId: UUID, groupLabel: string) {
-    const ownedGroups = await this.contactRepository.findListByOwnerId(ownerId);
-    const group = ownedGroups.find((c) => c.label === groupLabel);
-    if (!group) {
-      throw new KyselyError('404', 'label not found in owned groups');
-    }
+  async getUsersInGroupByLabel(
+    ownerId: UUID,
+    groupLabel: string,
+  ): Promise<GroupMembersResponseDto> {
     return this.contactMapper.toGroupMemberDto(
-      await this.contactRepository.getGroupMembers(group.id),
+      await this.contactRepository.getGroupMembers(
+        await this.contactMapper.toGroupId(ownerId, groupLabel),
+      ),
     );
   }
 
-  async addUserInGroupByLabel(ownerId: UUID, groupLabel: string, invitedUsername: string) {
-    const ownedGroups = await this.contactRepository.findListByOwnerId(ownerId);
-    const group = ownedGroups.find((c) => c.label === groupLabel);
+  async addUserInGroup(ownerId: UUID, groupLabel: string, invitedUsername: string) {
     const invitedUser = await this.userService.getUserByUsername(
       this.userMapper.formatUsername(invitedUsername),
     );
-    if (!group) {
-      throw new KyselyError('404', 'label not found in owned groups');
-    }
-    return await this.contactRepository.addMember(group.id, invitedUser.id);
-  }
-
-  async addUserInGroup(ownerId: UUID, groupId: UUID, invitedUsername: string) {
-    const ownedGroups = await this.contactRepository.findListByOwnerId(ownerId);
-    if (!ownedGroups.some((c) => c.ownerId === ownerId)) {
-      throw new KyselyError('403', 'group not owned');
-    }
     return await this.contactRepository.addMember(
-      groupId,
-      {
-        ...(await this.userService.getUserByUsername(
-          this.userMapper.formatUsername(invitedUsername),
-        )),
-      }.id,
+      await this.contactMapper.toGroupId(ownerId, groupLabel),
+      invitedUser.id,
     );
   }
 
   async deleteUserFromGroup(ownerId: UUID, groupLabel: string, toDeleteUsername: string) {
-    const ownedGroups = await this.contactRepository.findListByOwnerId(ownerId);
-    const group = ownedGroups.find((c) => c.label === groupLabel);
     const toRemoveUser = await this.userService.getUserByUsername(
       this.userMapper.formatUsername(toDeleteUsername),
     );
-    if (!group) {
-      throw new KyselyError('404', 'label not found in owned groups');
-    }
-    return await this.contactRepository.DeleteUserInGroup(group.id, toRemoveUser.id);
+    return await this.contactRepository.DeleteUserInGroup(
+      await this.contactMapper.toGroupId(ownerId, groupLabel),
+      toRemoveUser.id,
+    );
   }
 
   async createGroup(ownerId: UUID, label: string) {
@@ -74,10 +55,10 @@ export class ContactService {
   }
 
   async renameGroup(ownerId: UUID, oldLabel: string, newLabel: string) {
-    return await this.contactRepository.updateGroupLabel(ownerId, oldLabel, newLabel);
+    await this.contactRepository.updateGroupLabel(ownerId, oldLabel, newLabel);
   }
 
-  async delestGroup(ownerId: UUID, groupLabel: string) {
+  async deletGroup(ownerId: UUID, groupLabel: string) {
     return await this.contactRepository.deleteGroupByLabel(ownerId, groupLabel);
   }
 }
