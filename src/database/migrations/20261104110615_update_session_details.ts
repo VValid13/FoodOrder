@@ -23,7 +23,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn('fees', 'real', (column) => column.notNull().defaultTo(0))
     .addColumn('discount', 'real', (column) => column.notNull().defaultTo(0))
     .addColumn('free_mode', 'boolean', (column) => column.notNull().defaultTo(false))
-    .addColumn('public_slug', 'text', (column) => column.notNull().unique())
+    .addColumn('share_token', 'text', (column) => column.notNull().unique())
     .addColumn('expires_at', 'timestamptz', (column) => column.notNull())
     .execute();
 
@@ -62,7 +62,7 @@ export async function down(db: Kysely<unknown>): Promise<void> {
   await db.schema
     .alterTable('session')
     .dropColumn('expires_at')
-    .dropColumn('public_slug')
+    .dropColumn('share_token')
     .dropColumn('free_mode')
     .dropColumn('discount')
     .dropColumn('fees')

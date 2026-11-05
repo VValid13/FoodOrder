@@ -3,9 +3,9 @@ import { Type } from 'class-transformer';
 import { IsDate, IsIn, IsOptional, IsUUID, MaxLength } from 'class-validator';
 import { Optional } from 'class-validator-extended';
 import type { UUID } from 'node:crypto';
-import { MAX_PRICE, MIN_PRICE } from '../../../../_utils/constants/price.constants.js';
+import { MAX_AMOUNT, MIN_AMOUNT } from '../../../../_utils/constants/amount.constants.js';
+import { IsAmount } from '../../../../_utils/decorators/is-amount.decorator.js';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
-import { IsPrice } from '../../../../_utils/decorators/is-price.decorator.js';
 import { ToBoolean } from '../../../../_utils/decorators/to-boolean.decorator.js';
 import type { PaymentMode } from '../../../../database/database.types.js';
 import {
@@ -54,14 +54,14 @@ export class CreateSessionDto {
   @MaxLength(SESSION_PAYER_NAME_MAX_LENGTH)
   payerName?: string | null;
 
-  @ApiPropertyOptional({ example: 3, minimum: MIN_PRICE, maximum: MAX_PRICE, default: 0 })
+  @ApiPropertyOptional({ example: 3, minimum: MIN_AMOUNT, maximum: MAX_AMOUNT, default: 0 })
   @Optional()
-  @IsPrice()
+  @IsAmount()
   fees?: number;
 
-  @ApiPropertyOptional({ example: 0, minimum: MIN_PRICE, maximum: MAX_PRICE, default: 0 })
+  @ApiPropertyOptional({ example: 0, minimum: MIN_AMOUNT, maximum: MAX_AMOUNT, default: 0 })
   @Optional()
-  @IsPrice()
+  @IsAmount()
   discount?: number;
 
   @ApiPropertyOptional({

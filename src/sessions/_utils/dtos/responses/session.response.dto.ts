@@ -37,8 +37,8 @@ export class SessionResponseDto {
   @ApiProperty()
   freeMode: boolean;
 
-  @ApiProperty({ example: 'Kzh-FKI40WbU', description: 'Public part of the share link' })
-  publicSlug: string;
+  @ApiProperty({ example: 'Kzh-FKI40WbU', description: 'Secret token of the share link' })
+  shareToken: string;
 
   @ApiProperty({ description: 'The session is deleted after this date' })
   expiresAt: Date;

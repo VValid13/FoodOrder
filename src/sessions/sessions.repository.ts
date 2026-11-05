@@ -19,13 +19,13 @@ export class SessionsRepository {
   }
 
   async findAllSessions(
-    creatorId: UUID,
+    creatorId: UUID | undefined,
     status: SessionStatus | undefined,
   ): Promise<Selectable<Session>[]> {
     return await this.db
       .selectFrom('session')
       .selectAll()
-      .where('creatorId', '=', creatorId)
+      .$call((query) => (creatorId ? query.where('creatorId', '=', creatorId) : query))
       .$call((query) => (status ? query.where('status', '=', status) : query))
       .orderBy('deadlineAt', 'desc')
       .execute();

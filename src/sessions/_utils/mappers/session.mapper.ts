@@ -2,9 +2,12 @@ import { Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import type { Selectable } from 'kysely';
 import type { UUID } from 'node:crypto';
-import { generateSlug } from '../../../_utils/helpers/generate-slug.helper.js';
+import { generateToken } from '../../../_utils/helpers/generate-token.helper.js';
 import type { Session } from '../../../database/database.types.js';
-import { SESSION_LIFETIME_DAYS, SESSION_SLUG_LENGTH } from '../constants/sessions.constants.js';
+import {
+  SESSION_LIFETIME_DAYS,
+  SESSION_SHARE_TOKEN_LENGTH,
+} from '../constants/sessions.constants.js';
 import type { CreateSessionDto } from '../dtos/requests/create-session.dto.js';
 import type { SessionResponseDto } from '../dtos/responses/session.response.dto.js';
 import type { NewSessionValues } from '../types/session-values.type.js';
@@ -15,7 +18,7 @@ export class SessionMapper {
     return {
       ...createSessionDto,
       creatorId,
-      publicSlug: generateSlug(SESSION_SLUG_LENGTH),
+      shareToken: generateToken(SESSION_SHARE_TOKEN_LENGTH),
       expiresAt: dayjs().add(SESSION_LIFETIME_DAYS, 'day').toDate(),
     };
   }
@@ -33,7 +36,7 @@ export class SessionMapper {
       fees: session.fees,
       discount: session.discount,
       freeMode: session.freeMode,
-      publicSlug: session.publicSlug,
+      shareToken: session.shareToken,
       expiresAt: session.expiresAt,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,

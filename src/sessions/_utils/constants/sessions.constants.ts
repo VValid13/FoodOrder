@@ -2,7 +2,7 @@ import type { PaymentMode, SessionStatus } from '../../../database/database.type
 
 export const SESSION_LABEL_MAX_LENGTH = 100;
 export const SESSION_PAYER_NAME_MAX_LENGTH = 50;
-export const SESSION_SLUG_LENGTH = 12;
+export const SESSION_SHARE_TOKEN_LENGTH = 12;
 export const SESSION_LIFETIME_DAYS = 30;
 
 export const SESSION_STATUSES = {
@@ -28,15 +28,15 @@ export const SESSION_ID_ROUTE = `:${SESSION_ID_PARAM}`;
 
 export const SESSIONS_SWAGGER = {
   CREATE: 'Create a draft session on a restaurant',
-  FIND_ALL: 'List my sessions, optionally filtered by status',
-  FIND_ONE: 'Get one of my sessions',
-  UPDATE: 'Update one of my sessions, refused once it is ordered',
+  FIND_ALL: 'List my sessions (all sessions for an admin), optionally filtered by status',
+  FIND_ONE: 'Get one of my sessions (any session for an admin)',
+  UPDATE: 'Update one of my sessions (any session for an admin), refused once it is ordered',
   INVALID_BODY: 'Invalid body',
   INVALID_QUERY: 'Invalid status',
   INVALID_ID_OR_BODY: 'Invalid session id or body',
   INVALID_ID: 'Invalid session id',
   INVALID_SCHEDULE: 'Deadline in the past or pickup before deadline',
-  NOT_OWNER: 'This session belongs to another user',
+  NOT_OWNER: 'This session belongs to another user and you are not an admin',
   SESSION_NOT_FOUND: 'Session not found',
   RESTAURANT_NOT_FOUND: 'Restaurant not found',
 } as const satisfies Record<string, string>;

@@ -169,8 +169,8 @@ export interface Session {
   payerName: string | null;
   paymentMode: Generated<PaymentMode>;
   pickupAt: Timestamp;
-  publicSlug: string;
   restaurantId: UUID;
+  shareToken: string;
   status: Generated<SessionStatus>;
   updatedAt: Generated<Timestamp>;
 }

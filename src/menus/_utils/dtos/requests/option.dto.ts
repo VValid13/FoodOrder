@@ -2,9 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsUUID, MaxLength } from 'class-validator';
 import { Optional } from 'class-validator-extended';
 import type { UUID } from 'node:crypto';
-import { MAX_PRICE, MIN_PRICE } from '../../../../_utils/constants/price.constants.js';
+import { MAX_AMOUNT, MIN_AMOUNT } from '../../../../_utils/constants/amount.constants.js';
+import { IsAmount } from '../../../../_utils/decorators/is-amount.decorator.js';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
-import { IsPrice } from '../../../../_utils/decorators/is-price.decorator.js';
 import { OPTION_LABEL_MAX_LENGTH } from '../../constants/menus.constants.js';
 
 export class OptionDto {
@@ -18,8 +18,8 @@ export class OptionDto {
   @MaxLength(OPTION_LABEL_MAX_LENGTH)
   label: string;
 
-  @ApiPropertyOptional({ example: 1.5, minimum: MIN_PRICE, maximum: MAX_PRICE, default: 0 })
+  @ApiPropertyOptional({ example: 1.5, minimum: MIN_AMOUNT, maximum: MAX_AMOUNT, default: 0 })
   @Optional()
-  @IsPrice()
+  @IsAmount()
   price?: number;
 }

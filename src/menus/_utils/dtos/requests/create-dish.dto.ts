@@ -2,9 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ArrayMaxSize, IsArray, MaxLength, ValidateNested } from 'class-validator';
 import { Optional } from 'class-validator-extended';
-import { MAX_PRICE, MIN_PRICE } from '../../../../_utils/constants/price.constants.js';
+import { MAX_AMOUNT, MIN_AMOUNT } from '../../../../_utils/constants/amount.constants.js';
+import { IsAmount } from '../../../../_utils/decorators/is-amount.decorator.js';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
-import { IsPrice } from '../../../../_utils/decorators/is-price.decorator.js';
 import {
   DISH_CATEGORY_MAX_LENGTH,
   DISH_LABEL_MAX_LENGTH,
@@ -23,8 +23,8 @@ export class CreateDishDto {
   @MaxLength(DISH_CATEGORY_MAX_LENGTH)
   category: string;
 
-  @ApiProperty({ example: 8.3, minimum: MIN_PRICE, maximum: MAX_PRICE })
-  @IsPrice()
+  @ApiProperty({ example: 8.3, minimum: MIN_AMOUNT, maximum: MAX_AMOUNT })
+  @IsAmount()
   price: number;
 
   @ApiPropertyOptional({

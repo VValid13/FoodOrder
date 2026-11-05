@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
 import type { Selectable } from 'kysely';
 import type { UUID } from 'node:crypto';
+import { USER_ROLES } from '../_utils/constants/user-role.constants.js';
 import { isOpenAt } from '../_utils/helpers/is-open-at.helper.js';
 import type { Session } from '../database/database.types.js';
 import { RestaurantsService } from '../restaurants/restaurants.service.js';
+import type { UserEntity } from '../users/users.entity.js';
 import { SESSION_STATUSES } from './_utils/constants/sessions.constants.js';
 import type { CreateSessionDto } from './_utils/dtos/requests/create-session.dto.js';
 import type { FindSessionsDto } from './_utils/dtos/requests/find-sessions.dto.js';
@@ -38,22 +40,26 @@ export class SessionsService {
   }
 
   async findAllSessions(
-    creatorId: UUID,
+    user: UserEntity,
     { status }: FindSessionsDto,
   ): Promise<SessionResponseDto[]> {
+    const creatorId = user.role === USER_ROLES.ADMIN ? undefined : user.id;
     return this.sessionMapper.toSessionResponseList(
       await this.sessionsRepository.findAllSessions(creatorId, status),
     );
   }
 
-  findSession(session: Selectable<Session>): SessionResponseDto {
+  findSession(session: Selectable<Session>, user: UserEntity): SessionResponseDto {
+    this.checkOwnerOrAdmin(session, user);
     return this.sessionMapper.toSessionResponse(session);
   }
 
   async updateSession(
     session: Selectable<Session>,
     updateSessionDto: UpdateSessionDto,
+    user: UserEntity,
   ): Promise<SessionResponseDto> {
+    this.checkOwnerOrAdmin(session, user);
     if (session.status === SESSION_STATUSES.ORDERED) {
       throw this.sessionsExceptions.alreadyOrdered;
     }
@@ -72,6 +78,12 @@ export class SessionsService {
     return this.sessionMapper.toSessionResponse(
       await this.sessionsRepository.updateSession(session.id, updateSessionDto),
     );
+  }
+
+  private checkOwnerOrAdmin(session: Selectable<Session>, user: UserEntity): void {
+    if (session.creatorId !== user.id && user.role !== USER_ROLES.ADMIN) {
+      throw this.sessionsExceptions.accessForbidden;
+    }
   }
 
   private ensureFutureDeadline(deadlineAt: Date): void {

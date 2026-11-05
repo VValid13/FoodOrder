@@ -13,7 +13,7 @@ type EditableSessionColumns =
 
 export type NewSessionValues = Pick<
   Insertable<Session>,
-  EditableSessionColumns | 'restaurantId' | 'creatorId' | 'publicSlug' | 'expiresAt'
+  EditableSessionColumns | 'restaurantId' | 'creatorId' | 'shareToken' | 'expiresAt'
 >;
 
 export type SessionChanges = Pick<Updateable<Session>, EditableSessionColumns>;

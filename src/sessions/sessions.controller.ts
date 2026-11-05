@@ -12,11 +12,11 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import type { Selectable } from 'kysely';
-import type { UUID } from 'node:crypto';
-import { GetUserPropertyInPayload } from '../_utils/decorators/connected-user-decorator.js';
+import { ConnectedUser } from '../_utils/decorators/connected-user-decorator.js';
 import { getEntityByIdPipe } from '../_utils/pipes/get-entity-by-id.pipe.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import type { Session } from '../database/database.types.js';
+import type { UserEntity } from '../users/users.entity.js';
 import {
   SESSION_ID_PARAM,
   SESSION_ID_ROUTE,
@@ -34,7 +34,7 @@ import {
 } from './_utils/exceptions/sessions.exceptions.js';
 import { SessionsService } from './sessions.service.js';
 
-const OwnedSessionPipe = getEntityByIdPipe('session', { ownerProperty: 'creatorId' });
+const ParseSessionPipe = getEntityByIdPipe('session');
 
 @ApiTags(SESSIONS_TAG)
 @Controller(SESSIONS_ROUTE)
@@ -49,10 +49,10 @@ export class SessionsController {
   @ApiNotFoundResponse({ description: SESSIONS_SWAGGER.RESTAURANT_NOT_FOUND })
   @ApiUnprocessableEntityResponse({ description: RESTAURANT_CLOSED_MESSAGE })
   async createSession(
-    @GetUserPropertyInPayload() userId: UUID,
+    @ConnectedUser() user: UserEntity,
     @Body() createSessionDto: CreateSessionDto,
   ): Promise<SessionResponseDto> {
-    return await this.sessionsService.createSession(createSessionDto, userId);
+    return await this.sessionsService.createSession(createSessionDto, user.id);
   }
 
   @Protect()
@@ -61,10 +61,10 @@ export class SessionsController {
   @ApiOkResponse({ type: [SessionResponseDto] })
   @ApiBadRequestResponse({ description: SESSIONS_SWAGGER.INVALID_QUERY })
   async findAllSessions(
-    @GetUserPropertyInPayload() userId: UUID,
+    @ConnectedUser() user: UserEntity,
     @Query() findSessionsDto: FindSessionsDto,
   ): Promise<SessionResponseDto[]> {
-    return await this.sessionsService.findAllSessions(userId, findSessionsDto);
+    return await this.sessionsService.findAllSessions(user, findSessionsDto);
   }
 
   @Protect()
@@ -76,9 +76,10 @@ export class SessionsController {
   @ApiForbiddenResponse({ description: SESSIONS_SWAGGER.NOT_OWNER })
   @ApiNotFoundResponse({ description: SESSIONS_SWAGGER.SESSION_NOT_FOUND })
   findSession(
-    @Param(SESSION_ID_PARAM, OwnedSessionPipe) session: Selectable<Session>,
+    @ConnectedUser() user: UserEntity,
+    @Param(SESSION_ID_PARAM, ParseSessionPipe) session: Selectable<Session>,
   ): SessionResponseDto {
-    return this.sessionsService.findSession(session);
+    return this.sessionsService.findSession(session, user);
   }
 
   @Protect()
@@ -92,9 +93,10 @@ export class SessionsController {
   @ApiConflictResponse({ description: SESSION_ALREADY_ORDERED_MESSAGE })
   @ApiUnprocessableEntityResponse({ description: RESTAURANT_CLOSED_MESSAGE })
   async updateSession(
-    @Param(SESSION_ID_PARAM, OwnedSessionPipe) session: Selectable<Session>,
+    @ConnectedUser() user: UserEntity,
+    @Param(SESSION_ID_PARAM, ParseSessionPipe) session: Selectable<Session>,
     @Body() updateSessionDto: UpdateSessionDto,
   ): Promise<SessionResponseDto> {
-    return await this.sessionsService.updateSession(session, updateSessionDto);
+    return await this.sessionsService.updateSession(session, updateSessionDto, user);
   }
 }
