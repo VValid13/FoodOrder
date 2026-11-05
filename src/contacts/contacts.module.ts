@@ -19,7 +19,6 @@ import { ContactMapper } from './contacts.mapper.js';
     UsersService,
     UsersRepository,
   ],
-  //exports: [ContactService],
   controllers: [ContactsController],
 })
 export class ContactsModule {}
