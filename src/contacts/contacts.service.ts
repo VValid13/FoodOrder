@@ -39,13 +39,19 @@ export class ContactService {
     );
   }
 
-  async deleteUserFromGroup(ownerId: UUID, groupLabel: string, toDeleteUsername: string) {
-    const toRemoveUser = await this.userService.getUserByUsername(
-      this.userMapper.formatUsername(toDeleteUsername),
-    );
+  // async deleteUserFromGroup(ownerId: UUID, groupLabel: string, toDeleteUsername: string) {
+  //   const toRemoveUser = await this.userService.getUserByUsername(
+  //     this.userMapper.formatUsername(toDeleteUsername),
+  //   );
+  //   return await this.contactRepository.DeleteUserInGroup(
+  //     await this.contactMapper.toGroupId(ownerId, groupLabel),
+  //     toRemoveUser.id,
+  //   );
+  // }
+  async deleteUser(ownerId: UUID, groupId: UUID, toDeleteUserId: UUID) {
     return await this.contactRepository.DeleteUserInGroup(
-      await this.contactMapper.toGroupId(ownerId, groupLabel),
-      toRemoveUser.id,
+      groupId,
+      toDeleteUserId,
     );
   }
 

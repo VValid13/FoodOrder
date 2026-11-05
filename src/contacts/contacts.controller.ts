@@ -54,15 +54,16 @@ export class ContactsController {
   }
 
   @Protect()
-  @Delete('/:label/members')
-  @ApiParam({ type: 'UUID', name: 'memberUSername' })
+  @Delete('/:groupId/members/:memberId')
+  @ApiParam({ type: 'UUID', name: 'groupId' })
+  @ApiParam({ type: 'UUID', name: 'memberId' })
   @ApiOperation({ summary: 'Remove member from group' })
   async deleteUsersInList(
     @GetUserPropertyInPayload() ownerId: crypto.UUID,
-    @Param('label') groupLabel: string,
-    @Body() memberUsernameDto: MemberUsernameRequestDto,
+    @Param('groupId') groupId: crypto.UUID,
+    @Param('memberId') memberId: crypto.UUID,
   ) {
-    await this.contactService.deleteUserFromGroup(ownerId, groupLabel, memberUsernameDto.username);
+    await this.contactService.deleteUser(ownerId, groupId, memberId);
   }
 
   @Protect()
