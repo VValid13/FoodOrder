@@ -1,12 +1,12 @@
-import { Optional } from 'class-validator-extended';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
-import { MaxLength } from 'class-validator';
+import { IsUUID, MaxLength } from 'class-validator';
+import { type UUID } from 'crypto';
 
 export class RenameGroupRequestDto {
-  @ApiProperty({ description: 'optional old label value', example: 'NewGroupName' })
-  @Optional()
-  oldLabel: string;
+  @ApiProperty({ description: 'group id', example: '5f575f58-5ec9-4067-a360-9bdeaf2cde7a' })
+  @IsUUID()
+  groupId: UUID;
 
   @ApiProperty({ description: 'new label value', example: 'NewGroupName' })
   @IsNotEmptyString()

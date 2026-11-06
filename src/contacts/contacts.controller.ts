@@ -53,7 +53,7 @@ export class ContactsController {
 
   @Protect()
   @Post('/:groupId/members')
-  @ApiCreatedResponse({type: Boolean})
+  @ApiCreatedResponse()
   @ApiBadRequestResponse({ description: 'Invalid group id or invalid user id in body' })
   @ApiNotFoundResponse({ description: 'group id not found in owned groups or user id not found' })
   @ApiConflictResponse({ description: 'user already in group' })
@@ -63,15 +63,18 @@ export class ContactsController {
     @GetUserPropertyInPayload() ownerId: UUID,
     @Param('groupId') groupId: UUID,
     @Body() memberIdDto: MemberRequestDto,
-  ): Promise<boolean> {
-    return (await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id)).insertId != undefined;
+  ): Promise<void> {
+    if (!(await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id)).numInsertedOrUpdatedRows){
+      throw new NotFoundException('group id not found in owned groups or user id not found')
+    }
   }
 
   @Protect()
   @Delete('/:groupId/members/:memberId')
-  @ApiAcceptedResponse({type: Boolean})
+  @ApiOkResponse()
   @ApiBadRequestResponse({ description: 'Invalid group id or user id in body' })
-  @ApiNotFoundResponse({ description: 'group id not found in owned groups or user id not found in group' })
+  @ApiNotFoundResponse({ description: 'group id not found in owned groups' })
+  @ApiNotFoundResponse({ description: 'user id not found in group' })
   @ApiParam({ type: 'UUID', name: 'groupId' })
   @ApiParam({ type: 'UUID', name: 'memberId' })
   @ApiOperation({ summary: 'Remove member from group' })
@@ -79,31 +82,31 @@ export class ContactsController {
     @GetUserPropertyInPayload() ownerId: UUID,
     @Param('groupId') groupId: UUID,
     @Param('memberId') memberId: UUID,
-  ): Promise<boolean> {
-    return (await this.contactService.deleteUser(ownerId, groupId, memberId)).numDeletedRows > 0n;
+  ): Promise<void> {
+     if ((await this.contactService.deleteUser(ownerId, groupId, memberId)).numDeletedRows <= 0n){
+      throw new NotFoundException('user id not found in group')
+     }
   }
 
   @Protect()
   @Patch()
-  @ApiAcceptedResponse({type: Boolean})
-  @ApiBadRequestResponse({ description: 'Invalid group id' })
-  @ApiNotFoundResponse({ description: 'id not found in owned groups or user id not found' })
-  @ApiNotFoundResponse({ description: 'group not found' })
-  @ApiConflictResponse({ description: 'user already in group' })
+  //@ApiOkResponse({type: Boolean})
+  @ApiBadRequestResponse({ description: 'new group name format invalid (empty or too long)' })
+  @ApiNotFoundResponse({ description: 'id not found in owned groups' })
+  @ApiConflictResponse({ description: 'group label already exist in this group' })
   @ApiOperation({ summary: 'update group label' })
   async renameGroup(
     @GetUserPropertyInPayload() userId: UUID,
     @Body() groupLabelDto: RenameGroupRequestDto,
-  ): Promise<boolean> {
-    if (!groupLabelDto.oldLabel) {
-      throw new NotFoundException('group not found');
+  ): Promise<void> {
+    if ((await this.contactService.renameGroup(userId, groupLabelDto.groupId, groupLabelDto.newLabel)).numUpdatedRows <= 0n){
+      throw new NotFoundException('id not found in owned groups')
     }
-    return (await this.contactService.renameGroup(userId, groupLabelDto.oldLabel, groupLabelDto.newLabel)).numUpdatedRows > 0n;
   }
 
   @Protect()
   @Delete('/:groupId')
-  @ApiOkResponse({type: Boolean})
+  @ApiOkResponse()
   @ApiBadRequestResponse({ description: 'Invalid group id' })
   @ApiNotFoundResponse({ description: 'id not found in owned groups' })
   @ApiParam({ type: 'UUID', name: 'groupId' })
@@ -111,7 +114,9 @@ export class ContactsController {
   async delestList(
     @GetUserPropertyInPayload() userId: UUID,
     @Param('groupId') groupId: UUID,
-  ): Promise<boolean> {
-    return (await this.contactService.deletGroup(userId, groupId)).numDeletedRows > 0n;
+  ): Promise<void> {
+    if ((await this.contactService.deletGroup(userId, groupId)).numDeletedRows <= 0n){
+      throw new NotFoundException('id not found in owned groups')
+    }
   }
 }
