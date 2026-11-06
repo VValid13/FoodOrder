@@ -1,4 +1,4 @@
-import { Catch, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContactRepository } from './contacts.repository.js';
 import { UUID } from 'crypto';
 import { ContactMapper } from './contacts.mapper.js';
@@ -12,47 +12,33 @@ export class ContactService {
   constructor(
     private readonly contactRepository: ContactRepository,
     private readonly contactMapper: ContactMapper,
-    private readonly userService: UsersService
+    private readonly userService: UsersService,
   ) {}
 
   async getMyGroups(ownerId: UUID): Promise<MyGroupsResponseDto> {
-    return this.contactMapper.toGroupsDto(
-      await this.contactRepository.getAllOwnedGroups(ownerId)
-    );
+    return this.contactMapper.toGroupsDto(await this.contactRepository.getAllOwnedGroups(ownerId));
   }
 
-  async getUsersInGroupById(
-    ownerId: UUID,
-    groupId: UUID,
-  ): Promise<GroupMembersResponseDto> {
-    await this.isGroupOwnedOrThrow(ownerId, groupId)
+  async getUsersInGroupById(ownerId: UUID, groupId: UUID): Promise<GroupMembersResponseDto> {
+    await this.isGroupOwnedOrThrow(ownerId, groupId);
     return this.contactMapper.toGroupMemberDto(
-      await this.contactRepository.getGroupMembers(
-        groupId
-      ),
+      await this.contactRepository.getGroupMembers(groupId),
     );
   }
 
   async addUserInGroup(ownerId: UUID, groupId: UUID, invitedUserId: UUID): Promise<InsertResult> {
-    await this.isGroupOwnedOrThrow(ownerId, groupId)
-    try{
-      await this.userService.getUserById(invitedUserId)
-    }catch(e: any){
-      console.log(e.message);
+    await this.isGroupOwnedOrThrow(ownerId, groupId);
+    try {
+      await this.userService.getUserById(invitedUserId);
+    } catch {
       throw new NotFoundException('invited user not found');
     }
-    return await this.contactRepository.addMember(
-      groupId,
-      invitedUserId,
-    );
+    return await this.contactRepository.addMember(groupId, invitedUserId);
   }
 
   async deleteUser(ownerId: UUID, groupId: UUID, toDeleteUserId: UUID): Promise<DeleteResult> {
-    await this.isGroupOwnedOrThrow(ownerId, groupId)
-    return await this.contactRepository.DeleteUserInGroup(
-      groupId,
-      toDeleteUserId,
-    );
+    await this.isGroupOwnedOrThrow(ownerId, groupId);
+    return await this.contactRepository.DeleteUserInGroup(groupId, toDeleteUserId);
   }
 
   async createGroup(ownerId: UUID, label: string): Promise<MyGroupsResponseDto> {
@@ -70,10 +56,10 @@ export class ContactService {
   }
 
   //TODO MOVE TU UTILS
- private async isGroupOwnedOrThrow(userId:UUID, groupId: UUID): Promise<void> {
-  const myGroups = await this.contactRepository.getAllOwnedGroups(userId)
-  if(myGroups.find(e => e.id === groupId) === undefined){
-    throw new NotFoundException('id not found in owned groups');
-  };
- }
+  private async isGroupOwnedOrThrow(userId: UUID, groupId: UUID): Promise<void> {
+    const myGroups = await this.contactRepository.getAllOwnedGroups(userId);
+    if (myGroups.find((e) => e.id === groupId) === undefined) {
+      throw new NotFoundException('id not found in owned groups');
+    }
+  }
 }

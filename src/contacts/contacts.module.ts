@@ -6,14 +6,8 @@ import { ContactMapper } from './contacts.mapper.js';
 import { UsersModule } from '../users/users.module.js';
 
 @Module({
-  imports: [
-    UsersModule
-  ],
-  providers: [
-    ContactService,
-    ContactRepository,
-    ContactMapper,
-  ],
+  imports: [UsersModule],
+  providers: [ContactService, ContactRepository, ContactMapper],
   controllers: [ContactsController],
 })
 export class ContactsModule {}

@@ -10,6 +10,6 @@ export class RenameGroupRequestDto {
 
   @ApiProperty({ description: 'new label value', example: 'NewGroupName' })
   @IsNotEmptyString()
-  @MaxLength(12)//TODO MOVE TO CONSTANT
+  @MaxLength(12) //TODO MOVE TO CONSTANT
   newLabel: string;
 }

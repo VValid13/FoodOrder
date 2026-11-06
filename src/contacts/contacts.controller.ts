@@ -1,15 +1,32 @@
-import { Body, Controller, Get, Post, Patch, Delete, Param, NotFoundException } from '@nestjs/common';
-import { ApiAcceptedResponse, ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { type UUID } from 'crypto';
 import { ContactService } from './contacts.service.js';
 import { GetUserPropertyInPayload } from '../_utils/decorators/connected-user-decorator.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
 import { RenameGroupRequestDto } from './_utils/dtos/requests/rename-group.request.dto.js';
-import { MemberRequestDto as MemberRequestDto } from './_utils/dtos/requests/member-username.request.dto.js';
+import { MemberRequestDto } from './_utils/dtos/requests/member-username.request.dto.js';
 import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.dto.js';
 import { CreateGroupRequestDto } from './_utils/dtos/requests/create-group.request.dto.js';
 import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
-import { DeleteResult } from 'kysely';
 
 @ApiTags('contact')
 @Controller('contact')
@@ -18,7 +35,7 @@ export class ContactsController {
 
   @Protect()
   @Get()
-  @ApiOkResponse({type: MyGroupsResponseDto})
+  @ApiOkResponse({ type: MyGroupsResponseDto })
   @ApiOperation({ summary: 'Get all owned group' })
   async getMyGroups(@GetUserPropertyInPayload() userId: UUID): Promise<MyGroupsResponseDto> {
     return await this.contactService.getMyGroups(userId);
@@ -64,8 +81,11 @@ export class ContactsController {
     @Param('groupId') groupId: UUID,
     @Body() memberIdDto: MemberRequestDto,
   ): Promise<void> {
-    if (!(await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id)).numInsertedOrUpdatedRows){
-      throw new NotFoundException('group id not found in owned groups or user id not found')
+    if (
+      !(await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id))
+        .numInsertedOrUpdatedRows
+    ) {
+      throw new NotFoundException('group id not found in owned groups or user id not found');
     }
   }
 
@@ -83,9 +103,9 @@ export class ContactsController {
     @Param('groupId') groupId: UUID,
     @Param('memberId') memberId: UUID,
   ): Promise<void> {
-     if ((await this.contactService.deleteUser(ownerId, groupId, memberId)).numDeletedRows <= 0n){
-      throw new NotFoundException('user id not found in group')
-     }
+    if ((await this.contactService.deleteUser(ownerId, groupId, memberId)).numDeletedRows <= 0n) {
+      throw new NotFoundException('user id not found in group');
+    }
   }
 
   @Protect()
@@ -99,8 +119,11 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: UUID,
     @Body() groupLabelDto: RenameGroupRequestDto,
   ): Promise<void> {
-    if ((await this.contactService.renameGroup(userId, groupLabelDto.groupId, groupLabelDto.newLabel)).numUpdatedRows <= 0n){
-      throw new NotFoundException('id not found in owned groups')
+    if (
+      (await this.contactService.renameGroup(userId, groupLabelDto.groupId, groupLabelDto.newLabel))
+        .numUpdatedRows <= 0n
+    ) {
+      throw new NotFoundException('id not found in owned groups');
     }
   }
 
@@ -115,8 +138,8 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: UUID,
     @Param('groupId') groupId: UUID,
   ): Promise<void> {
-    if ((await this.contactService.deletGroup(userId, groupId)).numDeletedRows <= 0n){
-      throw new NotFoundException('id not found in owned groups')
+    if ((await this.contactService.deletGroup(userId, groupId)).numDeletedRows <= 0n) {
+      throw new NotFoundException('id not found in owned groups');
     }
   }
 }

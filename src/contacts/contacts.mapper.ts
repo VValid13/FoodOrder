@@ -13,12 +13,14 @@ export class ContactMapper {
   ) {}
 
   toGroupMemberDto = (members: UserEntity[]): GroupMembersResponseDto => {
-    return { users: members.map((e: UserEntity) => ({id: e.id, username: e.username}))};//this.userMapper.toGetUserDto(e)) };
+    return { users: members.map((e: UserEntity) => ({ id: e.id, username: e.username })) }; //this.userMapper.toGetUserDto(e)) };
   };
 
   toGroupsDto = (entityGroups: ContactEntity[]): MyGroupsResponseDto => {
-    return { groups: entityGroups.map((e: ContactEntity) => ({groupId: e.id, groupLabel: e.label}))};
-  }
+    return {
+      groups: entityGroups.map((e: ContactEntity) => ({ groupId: e.id, groupLabel: e.label })),
+    };
+  };
 
   toNewGroup = (id: UUID, label: string) => {
     return {
@@ -29,5 +31,4 @@ export class ContactMapper {
       updatedAt: new Date(),
     };
   };
-
 }
