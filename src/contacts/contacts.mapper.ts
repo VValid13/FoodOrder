@@ -2,14 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
 import { type UUID } from 'crypto';
 import { UserEntity } from '../users/users.entity.js';
-//import { UserMapper } from '../users/users.mapper.js';
 import { ContactEntity } from './contacts.entity.js';
 import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.dto.js';
 
 @Injectable()
 export class ContactMapper {
   constructor(
-    //private readonly userMapper: UserMapper,
   ) {}
 
   toGroupMemberDto = (members: UserEntity[]): GroupMembersResponseDto => {

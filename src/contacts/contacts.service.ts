@@ -26,19 +26,21 @@ export class ContactService {
     );
   }
 
-  async addUserInGroup(ownerId: UUID, groupId: UUID, invitedUserId: UUID): Promise<InsertResult> {
+  async addUserInGroup(ownerId: UUID, groupId: UUID, invitedUserId: UUID): Promise<void> {
     await this.isGroupOwnedOrThrow(ownerId, groupId);
     try {
       await this.userService.getUserById(invitedUserId);
     } catch {
       throw new NotFoundException('invited user not found');
     }
-    return await this.contactRepository.addMember(groupId, invitedUserId);
+    await this.contactRepository.addMember(groupId, invitedUserId);
   }
 
-  async deleteUser(ownerId: UUID, groupId: UUID, toDeleteUserId: UUID): Promise<DeleteResult> {
+  async deleteUser(ownerId: UUID, groupId: UUID, toDeleteUserId: UUID): Promise<void> {
     await this.isGroupOwnedOrThrow(ownerId, groupId);
-    return await this.contactRepository.DeleteUserInGroup(groupId, toDeleteUserId);
+    if ((await this.contactRepository.DeleteUserInGroup(groupId, toDeleteUserId)).numDeletedRows <= 0n) {
+       throw new NotFoundException('user id not found in group');
+     }
   }
 
   async createGroup(ownerId: UUID, label: string): Promise<MyGroupsResponseDto> {
@@ -47,12 +49,18 @@ export class ContactService {
     return this.contactMapper.toGroupsDto([newGroup]);
   }
 
-  async renameGroup(ownerId: UUID, groupId: UUID, newLabel: string): Promise<UpdateResult> {
-    return await this.contactRepository.updateOwnedGroupLabel(ownerId, groupId, newLabel);
+  async renameGroup(ownerId: UUID, groupId: UUID, newLabel: string): Promise<void> {
+
+    if((await this.contactRepository.updateOwnedGroupLabel(ownerId, groupId, newLabel)).numUpdatedRows <= 0n
+    ) {
+      throw new NotFoundException('id not found in owned groups');
+    };
   }
 
-  async deletGroup(ownerId: UUID, groupId: UUID): Promise<DeleteResult> {
-    return await this.contactRepository.deleteGroupById(ownerId, groupId);
+  async deletGroup(ownerId: UUID, groupId: UUID): Promise<void> {
+    if ((await this.contactRepository.deleteGroupById(ownerId, groupId)).numDeletedRows <= 0n) {
+      throw new NotFoundException('id not found in owned groups');
+    }
   }
 
   //TODO MOVE TU UTILS

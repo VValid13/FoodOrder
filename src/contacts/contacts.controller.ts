@@ -6,7 +6,6 @@ import {
   Patch,
   Delete,
   Param,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -72,7 +71,8 @@ export class ContactsController {
   @Post('/:groupId/members')
   @ApiCreatedResponse()
   @ApiBadRequestResponse({ description: 'Invalid group id or invalid user id in body' })
-  @ApiNotFoundResponse({ description: 'group id not found in owned groups or user id not found' })
+  @ApiNotFoundResponse({ description: 'group id not found in owned groups' })
+  @ApiNotFoundResponse({ description: 'user id not found in group' })
   @ApiConflictResponse({ description: 'user already in group' })
   @ApiParam({ type: 'UUID', name: 'groupId' })
   @ApiOperation({ summary: 'Add members in group by ids' })
@@ -81,12 +81,7 @@ export class ContactsController {
     @Param('groupId') groupId: UUID,
     @Body() memberIdDto: MemberRequestDto,
   ): Promise<void> {
-    if (
-      !(await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id))
-        .numInsertedOrUpdatedRows
-    ) {
-      throw new NotFoundException('group id not found in owned groups or user id not found');
-    }
+    await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id)
   }
 
   @Protect()
@@ -103,14 +98,12 @@ export class ContactsController {
     @Param('groupId') groupId: UUID,
     @Param('memberId') memberId: UUID,
   ): Promise<void> {
-    if ((await this.contactService.deleteUser(ownerId, groupId, memberId)).numDeletedRows <= 0n) {
-      throw new NotFoundException('user id not found in group');
-    }
+    await this.contactService.deleteUser(ownerId, groupId, memberId);
   }
 
   @Protect()
   @Patch()
-  //@ApiOkResponse({type: Boolean})
+  @ApiOkResponse()
   @ApiBadRequestResponse({ description: 'new group name format invalid (empty or too long)' })
   @ApiNotFoundResponse({ description: 'id not found in owned groups' })
   @ApiConflictResponse({ description: 'group label already exist in this group' })
@@ -119,12 +112,7 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: UUID,
     @Body() groupLabelDto: RenameGroupRequestDto,
   ): Promise<void> {
-    if (
-      (await this.contactService.renameGroup(userId, groupLabelDto.groupId, groupLabelDto.newLabel))
-        .numUpdatedRows <= 0n
-    ) {
-      throw new NotFoundException('id not found in owned groups');
-    }
+    await this.contactService.renameGroup(userId, groupLabelDto.groupId, groupLabelDto.newLabel);
   }
 
   @Protect()
@@ -138,8 +126,6 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: UUID,
     @Param('groupId') groupId: UUID,
   ): Promise<void> {
-    if ((await this.contactService.deletGroup(userId, groupId)).numDeletedRows <= 0n) {
-      throw new NotFoundException('id not found in owned groups');
-    }
+    await this.contactService.deletGroup(userId, groupId);
   }
 }
