@@ -1,15 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import { IsUUID, MaxLength } from 'class-validator';
 import { Optional } from 'class-validator-extended';
 import type { UUID } from 'node:crypto';
+import { MAX_AMOUNT, MIN_AMOUNT } from '../../../../_utils/constants/amount.constants.js';
+import { IsAmount } from '../../../../_utils/decorators/is-amount.decorator.js';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
-import {
-  MAX_PRICE,
-  MIN_PRICE,
-  OPTION_LABEL_MAX_LENGTH,
-  PRICE_DECIMAL_PLACES,
-  PRICE_FORMAT_MESSAGE,
-} from '../../constants/menus.constants.js';
+import { OPTION_LABEL_MAX_LENGTH } from '../../constants/menus.constants.js';
 
 export class OptionDto {
   @ApiPropertyOptional({ format: 'uuid', description: 'On update, keeps and edits this option' })
@@ -22,10 +18,8 @@ export class OptionDto {
   @MaxLength(OPTION_LABEL_MAX_LENGTH)
   label: string;
 
-  @ApiPropertyOptional({ example: 1.5, minimum: MIN_PRICE, maximum: MAX_PRICE, default: 0 })
+  @ApiPropertyOptional({ example: 1.5, minimum: MIN_AMOUNT, maximum: MAX_AMOUNT, default: 0 })
   @Optional()
-  @IsNumber({ maxDecimalPlaces: PRICE_DECIMAL_PLACES }, { message: PRICE_FORMAT_MESSAGE })
-  @Min(MIN_PRICE)
-  @Max(MAX_PRICE)
+  @IsAmount()
   price?: number;
 }

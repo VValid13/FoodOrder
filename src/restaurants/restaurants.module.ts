@@ -10,5 +10,6 @@ import { RestaurantsService } from './restaurants.service.js';
   imports: [PlacesModule, MenusModule],
   controllers: [RestaurantsController],
   providers: [RestaurantsService, RestaurantsRepository, RestaurantMapper],
+  exports: [RestaurantsService],
 })
 export class RestaurantsModule {}

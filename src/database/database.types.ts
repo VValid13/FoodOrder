@@ -18,6 +18,8 @@ export type OrderStatus = "cancelled" | "in_progress" | "modified" | "validated"
 
 export type PaymentMethod = "card" | "cash" | "other" | "transfer";
 
+export type PaymentMode = "each_pays" | "equal_split" | "payer_offers";
+
 export type SessionStatus = "closed" | "draft" | "open" | "ordered";
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
@@ -155,13 +157,21 @@ export interface RestaurantOpeningSlot {
 }
 
 export interface Session {
-  approxDeliveryTime: Timestamp | null;
   createdAt: Generated<Timestamp>;
   creatorId: UUID;
+  deadlineAt: Timestamp;
+  discount: Generated<number>;
+  expiresAt: Timestamp;
+  fees: Generated<number>;
+  freeMode: Generated<boolean>;
   id: Generated<UUID>;
+  label: string;
+  payerName: string | null;
+  paymentMode: Generated<PaymentMode>;
+  pickupAt: Timestamp;
   restaurantId: UUID;
+  shareToken: string;
   status: Generated<SessionStatus>;
-  timeLimit: Timestamp;
   updatedAt: Generated<Timestamp>;
 }
 
