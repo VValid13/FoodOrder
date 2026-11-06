@@ -7,8 +7,7 @@ import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.
 
 @Injectable()
 export class ContactMapper {
-  constructor(
-  ) {}
+  constructor() {}
 
   toGroupMemberDto = (members: UserEntity[]): GroupMembersResponseDto => {
     return { users: members.map((e: UserEntity) => ({ id: e.id, username: e.username })) }; //this.userMapper.toGetUserDto(e)) };

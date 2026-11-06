@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Patch, Delete, Param } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
@@ -81,7 +73,7 @@ export class ContactsController {
     @Param('groupId') groupId: UUID,
     @Body() memberIdDto: MemberRequestDto,
   ): Promise<void> {
-    await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id)
+    await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id);
   }
 
   @Protect()

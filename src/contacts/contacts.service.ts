@@ -4,7 +4,6 @@ import { UUID } from 'crypto';
 import { ContactMapper } from './contacts.mapper.js';
 import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
 import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.dto.js';
-import { DeleteResult, InsertResult, UpdateResult } from 'kysely';
 import { UsersService } from '../users/users.service.js';
 
 @Injectable()
@@ -38,9 +37,11 @@ export class ContactService {
 
   async deleteUser(ownerId: UUID, groupId: UUID, toDeleteUserId: UUID): Promise<void> {
     await this.isGroupOwnedOrThrow(ownerId, groupId);
-    if ((await this.contactRepository.DeleteUserInGroup(groupId, toDeleteUserId)).numDeletedRows <= 0n) {
-       throw new NotFoundException('user id not found in group');
-     }
+    if (
+      (await this.contactRepository.DeleteUserInGroup(groupId, toDeleteUserId)).numDeletedRows <= 0n
+    ) {
+      throw new NotFoundException('user id not found in group');
+    }
   }
 
   async createGroup(ownerId: UUID, label: string): Promise<MyGroupsResponseDto> {
@@ -50,11 +51,12 @@ export class ContactService {
   }
 
   async renameGroup(ownerId: UUID, groupId: UUID, newLabel: string): Promise<void> {
-
-    if((await this.contactRepository.updateOwnedGroupLabel(ownerId, groupId, newLabel)).numUpdatedRows <= 0n
+    if (
+      (await this.contactRepository.updateOwnedGroupLabel(ownerId, groupId, newLabel))
+        .numUpdatedRows <= 0n
     ) {
       throw new NotFoundException('id not found in owned groups');
-    };
+    }
   }
 
   async deletGroup(ownerId: UUID, groupId: UUID): Promise<void> {
