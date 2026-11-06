@@ -1,13 +1,15 @@
 import { Optional } from 'class-validator-extended';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-string.decorator.js';
+import { MaxLength } from 'class-validator';
 
-export class GroupLabelRequestDto {
+export class RenameGroupRequestDto {
   @ApiProperty({ description: 'optional old label value', example: 'NewGroupName' })
   @Optional()
   oldLabel: string;
 
   @ApiProperty({ description: 'new label value', example: 'NewGroupName' })
   @IsNotEmptyString()
+  @MaxLength(12)//TODO MOVE TO CONSTANT
   newLabel: string;
 }

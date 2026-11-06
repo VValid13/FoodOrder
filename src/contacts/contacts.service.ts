@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ContactRepository } from './contacts.repository.js';
 import { UUID } from 'crypto';
-import { UserMapper } from '../users/users.mapper.js';
-import { UsersService } from '../users/users.service.js';
 import { ContactMapper } from './contacts.mapper.js';
 import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
-import { UsersModule } from '../users/users.module.js';
+import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.dto.js';
+import { DeleteResult, InsertResult, UpdateResult } from 'kysely';
 
 @Injectable()
 export class ContactService {
@@ -13,16 +12,20 @@ export class ContactService {
     private readonly contactRepository: ContactRepository,
     private readonly contactMapper: ContactMapper,
   ) {}
-  async getMyGroups(ownerId: UUID) {
+
+  async getMyGroups(ownerId: UUID): Promise<MyGroupsResponseDto> {
     return this.contactMapper.toGroupsDto(
-      await this.contactRepository.findListByOwnerId(ownerId)
+      await this.contactRepository.getAllOwnedGroups(ownerId)
     );
   }
 
-  async getUsersInGroupByLabel(
+  async getUsersInGroupById(
     ownerId: UUID,
     groupId: UUID,
   ): Promise<GroupMembersResponseDto> {
+    if(!this.isGroupOwned(ownerId, groupId)){
+      throw new NotFoundException('id not found in owned groups');
+    }
     return this.contactMapper.toGroupMemberDto(
       await this.contactRepository.getGroupMembers(
         groupId
@@ -30,39 +33,43 @@ export class ContactService {
     );
   }
 
-  async addUserInGroup(ownerId: UUID, groupId: UUID, invitedUserId: UUID) {
+  async addUserInGroup(ownerId: UUID, groupId: UUID, invitedUserId: UUID): Promise<InsertResult> {
+    if(!this.isGroupOwned(ownerId, groupId)){
+      throw new NotFoundException('id not found in owned groups');
+    }
     return await this.contactRepository.addMember(
       groupId,
       invitedUserId,
     );
   }
 
-  // async deleteUserFromGroup(ownerId: UUID, groupLabel: string, toDeleteUsername: string) {
-  //   const toRemoveUser = await this.userService.getUserByUsername(
-  //     this.userMapper.formatUsername(toDeleteUsername),
-  //   );
-  //   return await this.contactRepository.DeleteUserInGroup(
-  //     await this.contactMapper.toGroupId(ownerId, groupLabel),
-  //     toRemoveUser.id,
-  //   );
-  // }
-  async deleteUser(ownerId: UUID, groupId: UUID, toDeleteUserId: UUID) {
+  async deleteUser(ownerId: UUID, groupId: UUID, toDeleteUserId: UUID): Promise<DeleteResult> {
+    if(!this.isGroupOwned(ownerId, groupId)){
+      throw new NotFoundException('id not found in owned groups');
+    }
     return await this.contactRepository.DeleteUserInGroup(
       groupId,
       toDeleteUserId,
     );
   }
 
-  async createGroup(ownerId: UUID, label: string) {
+  async createGroup(ownerId: UUID, label: string): Promise<MyGroupsResponseDto> {
     const newGroup = this.contactMapper.toNewGroup(ownerId, label);
-    return await this.contactRepository.createEmptyGroup(newGroup);
+    await this.contactRepository.createEmptyGroup(newGroup);
+    return this.contactMapper.toGroupsDto([newGroup]);
   }
 
-  async renameGroup(ownerId: UUID, oldLabel: string, newLabel: string) {
-    await this.contactRepository.updateGroupLabel(ownerId, oldLabel, newLabel);
+  async renameGroup(ownerId: UUID, oldLabel: string, newLabel: string): Promise<UpdateResult> {
+    return await this.contactRepository.updateOwnedGroupLabel(ownerId, oldLabel, newLabel);
   }
 
-  async deletGroup(ownerId: UUID, groupLabel: string) {
-    return await this.contactRepository.deleteGroupByLabel(ownerId, groupLabel);
+  async deletGroup(ownerId: UUID, groupId: UUID): Promise<DeleteResult> {
+    return await this.contactRepository.deleteGroupById(ownerId, groupId);
   }
+
+  //TODO MOVE TU UTILS
+ private async isGroupOwned(userId:UUID, groupId: UUID): Promise<boolean> {
+  const myGroups = await this.contactRepository.getAllOwnedGroups(userId)
+  return myGroups.find(e => e.id === groupId) != undefined;
+ }
 }
