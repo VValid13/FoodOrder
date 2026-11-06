@@ -10,7 +10,7 @@ import { hashTokenHelper } from '../_utils/helpers/hash-token.helper.js';
 @Module({
   imports: [forwardRef(() => JwtModule), EncryptionModule],
   providers: [UsersService, UsersRepository, UserMapper, hashTokenHelper],
-  exports: [UsersService],
+  exports: [UsersService, UserMapper],
   controllers: [UsersController],
 })
 export class UsersModule {}
