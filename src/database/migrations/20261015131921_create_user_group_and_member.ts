@@ -11,7 +11,6 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn('label', 'text', (column) => column.notNull())
     .addColumn('created_at', 'timestamptz', (column) => column.notNull().defaultTo(sql`now()`))
     .addColumn('updated_at', 'timestamptz', (column) => column.notNull().defaultTo(sql`now()`))
-    .addUniqueConstraint('unique_label_by_owner', ['owner_id', 'label'])
     .execute();
 
   await db.schema

@@ -52,7 +52,7 @@ export class ContactRepository {
   async getGroupMembers(groupId: UUID): Promise<UserEntity[]> {
     return await this.db
       .selectFrom('user')
-      .selectAll()
+      .selectAll('user')
       .innerJoin('userGroupMember', 'userGroupMember.userId', 'user.id')
       .where('userGroupMember.userGroupId', '=', groupId)
       .execute();
