@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
-import { type UUID } from 'crypto';
+import type { UUID } from 'crypto';
 import { UserEntity } from '../users/users.entity.js';
-import { ContactEntity } from './contacts.entity.js';
 import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.dto.js';
+import { ContactGroup } from './_utils/types/contact-group.type.js';
 
 @Injectable()
 export class ContactMapper {
@@ -14,9 +14,9 @@ export class ContactMapper {
     };
   };
 
-  toGroupsDto = (entityGroups: ContactEntity[]): MyGroupsResponseDto => {
+  toGroupsDto = (entityGroups: ContactGroup[]): MyGroupsResponseDto => {
     return {
-      groups: entityGroups.map((e: ContactEntity) => ({ groupId: e.id, groupLabel: e.label })),
+      groups: entityGroups.map((e: ContactGroup) => ({ groupId: e.id, groupLabel: e.label })),
     };
   };
 

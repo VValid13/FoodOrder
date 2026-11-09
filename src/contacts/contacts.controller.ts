@@ -9,12 +9,10 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { type UUID } from 'crypto';
+import type { UUID } from 'crypto';
 import { ContactService } from './contacts.service.js';
 import { GetUserPropertyInPayload } from '../_utils/decorators/connected-user-decorator.js';
 import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
-import { RenameGroupRequestDto } from './_utils/dtos/requests/rename-group.request.dto.js';
-import { MemberRequestDto } from './_utils/dtos/requests/member-username.request.dto.js';
 import { MyGroupsResponseDto } from './_utils/dtos/responses/my-groups.response.dto.js';
 import { CreateGroupRequestDto } from './_utils/dtos/requests/create-group.request.dto.js';
 import { GroupMembersResponseDto } from './_utils/dtos/responses/group-members.response.dto.js';
@@ -51,7 +49,6 @@ export class ContactsController {
   @ApiOkResponse({ type: GroupMembersResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid group id' })
   @ApiNotFoundResponse({ description: 'id not found in owned groups' })
-  //@ApiParam({ type: 'UUID', name: 'groupId' })
   @ApiParam({ name: 'groupId', format: 'uuid' })
   @ApiOperation({ summary: 'Get all members in group' })
   async getUsersInGroupByLabel(
@@ -62,7 +59,7 @@ export class ContactsController {
   }
 
   @Protect()
-  @Post('/:groupId/members')
+  @Post('/:groupId/members/:memberId')
   @ApiCreatedResponse()
   @ApiBadRequestResponse({ description: 'Invalid group id or invalid user id in body' })
   @ApiNotFoundResponse({
@@ -70,25 +67,27 @@ export class ContactsController {
   })
   @ApiConflictResponse({ description: 'user already in group' })
   @ApiParam({ name: 'groupId', format: 'uuid' })
+  @ApiParam({ name: 'memberId', format: 'uuid' })
   @ApiOperation({ summary: 'Add members in group by ids' })
   async addUserInGroupById(
     @GetUserPropertyInPayload() ownerId: UUID,
     @Param('groupId', ParseEntityIdPipe) groupId: UUID,
-    @Body() memberIdDto: MemberRequestDto,
+    @Param('memberId', ParseEntityIdPipe) memberId: UUID,
   ): Promise<void> {
-    await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id);
+    await this.contactService.addUserInGroup(ownerId, groupId, memberId);
   }
 
   @Protect()
   @Delete('/:groupId/members/:memberId')
   @ApiOkResponse()
   @ApiBadRequestResponse({ description: 'Invalid group id or user id in body' })
-  @ApiNotFoundResponse({ description: 'group id not found in owned groups' })
-  @ApiNotFoundResponse({ description: 'user id not found in group' })
+  @ApiNotFoundResponse({
+    description: 'group id not found in owned groups or user id not found in group',
+  })
   @ApiParam({ name: 'groupId', format: 'uuid' })
   @ApiParam({ name: 'memberId', format: 'uuid' })
   @ApiOperation({ summary: 'Remove member from group' })
-  async deleteUsersInList(
+  async deleteUserInList(
     @GetUserPropertyInPayload() ownerId: UUID,
     @Param('groupId', ParseEntityIdPipe) groupId: UUID,
     @Param('memberId', ParseEntityIdPipe) memberId: UUID,
@@ -97,17 +96,19 @@ export class ContactsController {
   }
 
   @Protect()
-  @Patch()
+  @Patch('/:groupId')
   @ApiOkResponse()
   @ApiBadRequestResponse({ description: 'new group name format invalid (empty or too long)' })
   @ApiNotFoundResponse({ description: 'id not found in owned groups' })
   @ApiConflictResponse({ description: 'group label already exist in this group' })
+  @ApiParam({ name: 'groupId', format: 'uuid' })
   @ApiOperation({ summary: 'update group label' })
   async renameGroup(
     @GetUserPropertyInPayload() userId: UUID,
-    @Body() groupLabelDto: RenameGroupRequestDto,
+    @Param('groupId', ParseEntityIdPipe) groupId: UUID,
+    @Body() createGroupRequestDto: CreateGroupRequestDto,
   ): Promise<void> {
-    await this.contactService.renameGroup(userId, groupLabelDto.groupId, groupLabelDto.newLabel);
+    await this.contactService.renameGroup(userId, groupId, createGroupRequestDto.label);
   }
 
   @Protect()
@@ -117,7 +118,7 @@ export class ContactsController {
   @ApiNotFoundResponse({ description: 'id not found in owned groups' })
   @ApiParam({ name: 'groupId', format: 'uuid' })
   @ApiOperation({ summary: 'Delete group by id' })
-  async delestList(
+  async deleteList(
     @GetUserPropertyInPayload() userId: UUID,
     @Param('groupId', ParseEntityIdPipe) groupId: UUID,
   ): Promise<void> {

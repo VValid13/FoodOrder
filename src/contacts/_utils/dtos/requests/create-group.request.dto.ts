@@ -5,6 +5,6 @@ import { IsNotEmptyString } from '../../../../_utils/decorators/is-not-empty-str
 export class CreateGroupRequestDto {
   @ApiProperty({ description: 'group name', example: 'NewGroupName' })
   @IsNotEmptyString()
-  @MaxLength(12) //TODO MOVE TO CONSTANT
+  @MaxLength(50)
   label: string;
 }

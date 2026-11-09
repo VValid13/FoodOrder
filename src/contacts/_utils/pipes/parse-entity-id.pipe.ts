@@ -6,7 +6,6 @@ import { isUuid } from '../../../_utils/helpers/is-uuid.helper.js';
 @Injectable()
 export class ParseEntityIdPipe implements PipeTransform<string, Promise<UUID>> {
   constructor(
-    //private readonly restaurantsRepository: RestaurantsRepository,
     private readonly contactsExceptions: ContactsExceptions,
   ) {}
 

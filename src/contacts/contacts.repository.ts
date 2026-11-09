@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { type UUID } from 'crypto';
+import type { UUID } from 'crypto';
 import { DeleteResult, InsertResult, Kysely, UpdateResult } from 'kysely';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import { DatabaseTables } from '../database/database.types.js';
