@@ -1,0 +1,1 @@
+export const NOT_FOUND_MESSAGE_SUFFIX = '_NOT_FOUND';

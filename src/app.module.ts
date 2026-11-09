@@ -5,8 +5,10 @@ import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { MenusModule } from './menus/menus.module.js';
 import { RestaurantsModule } from './restaurants/restaurants.module.js';
 import { ContactsModule } from './contacts/contacts.module.js';
+import { SessionsModule } from './sessions/sessions.module.js';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { ContactsModule } from './contacts/contacts.module.js';
     ContactsModule,
     AuthModule,
     RestaurantsModule,
+    MenusModule,
+    SessionsModule,
   ],
 })
 export class AppModule {}

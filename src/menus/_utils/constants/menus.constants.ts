@@ -1,0 +1,20 @@
+export const MENU_NAME_MAX_LENGTH = 100;
+
+export const DISH_LABEL_MAX_LENGTH = 100;
+export const DISH_CATEGORY_MAX_LENGTH = 50;
+
+export const OPTION_GROUP_LABEL_MAX_LENGTH = 50;
+export const MAX_OPTION_GROUPS_PER_DISH = 10;
+
+export const OPTION_LABEL_MAX_LENGTH = 50;
+export const MAX_OPTIONS_PER_GROUP = 30;
+
+export const MIN_CHOICES = 1;
+
+export const MENUS_ROUTE = 'menus';
+export const MENUS_TAG = 'Menus';
+export const MENU_ID_PARAM = 'menuId';
+export const MENU_ID_ROUTE = `:${MENU_ID_PARAM}`;
+export const DISH_ID_PARAM = 'dishId';
+export const DISHES_ROUTE = `${MENU_ID_ROUTE}/dishes`;
+export const DISH_ID_ROUTE = `${DISHES_ROUTE}/:${DISH_ID_PARAM}`;

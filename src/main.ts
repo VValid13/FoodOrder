@@ -7,10 +7,14 @@ import { configureApp } from './app.setup.js';
 import cookieParser from 'cookie-parser';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import timezone from 'dayjs/plugin/timezone.js';
+import utc from 'dayjs/plugin/utc.js';
 import { PostgresExceptionFilter } from './_utils/filters/postgres-exception-filter.js';
 
 async function bootstrap() {
   dayjs.extend(customParseFormat);
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
 
   const app = await NestFactory.create(AppModule);
   configureApp(app);

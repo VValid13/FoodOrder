@@ -1,0 +1,156 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import type { Selectable } from 'kysely';
+import type { UUID } from 'node:crypto';
+import { USER_ROLES } from '../_utils/constants/user-role.constants.js';
+import { getEntityByIdPipe } from '../_utils/pipes/get-entity-by-id.pipe.js';
+import { ParseUuidPipe } from '../_utils/pipes/parse-uuid.pipe.js';
+import { Protect } from '../auth/_utils/decorators/protect.decorator.js';
+import {
+  DISH_ID_PARAM,
+  DISH_ID_ROUTE,
+  DISHES_ROUTE,
+  MENU_ID_PARAM,
+  MENU_ID_ROUTE,
+  MENUS_ROUTE,
+  MENUS_TAG,
+} from './_utils/constants/menus.constants.js';
+import { CreateDishDto } from './_utils/dtos/requests/create-dish.dto.js';
+import { CreateMenuDto } from './_utils/dtos/requests/create-menu.dto.js';
+import { UpdateDishDto } from './_utils/dtos/requests/update-dish.dto.js';
+import { UpdateMenuDto } from './_utils/dtos/requests/update-menu.dto.js';
+import { MenuResponseDto } from './_utils/dtos/responses/menu.response.dto.js';
+import type { Menu } from '../database/database.types.js';
+import { MenusService } from './menus.service.js';
+
+@ApiTags(MENUS_TAG)
+@Controller(MENUS_ROUTE)
+export class MenusController {
+  constructor(private readonly menusService: MenusService) {}
+
+  @Protect({ roles: [USER_ROLES.ADMIN] })
+  @Post()
+  @ApiOperation({ summary: 'Create a menu' })
+  @ApiCreatedResponse({ type: MenuResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid body' })
+  async createMenu(@Body() createMenuDto: CreateMenuDto): Promise<MenuResponseDto> {
+    return await this.menusService.createMenu(createMenuDto);
+  }
+
+  @Protect()
+  @Get()
+  @ApiOperation({ summary: 'List menus with their dishes' })
+  @ApiOkResponse({ type: [MenuResponseDto] })
+  async findAllMenus(): Promise<MenuResponseDto[]> {
+    return await this.menusService.findAllMenus();
+  }
+
+  @Protect()
+  @Get(MENU_ID_ROUTE)
+  @ApiOperation({ summary: 'Get a menu with its dishes sorted by category then label' })
+  @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
+  @ApiOkResponse({ type: MenuResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid menu id' })
+  @ApiNotFoundResponse({ description: 'Menu not found' })
+  async findMenu(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+  ): Promise<MenuResponseDto> {
+    return await this.menusService.findMenuById(menu.id);
+  }
+
+  @Protect({ roles: [USER_ROLES.ADMIN] })
+  @Patch(MENU_ID_ROUTE)
+  @ApiOperation({ summary: 'Rename a menu' })
+  @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
+  @ApiOkResponse({ type: MenuResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid menu id or body' })
+  @ApiNotFoundResponse({ description: 'Menu not found' })
+  async updateMenu(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+    @Body() updateMenuDto: UpdateMenuDto,
+  ): Promise<MenuResponseDto> {
+    return await this.menusService.updateMenu(menu, updateMenuDto);
+  }
+
+  @Protect({ roles: [USER_ROLES.ADMIN] })
+  @Delete(MENU_ID_ROUTE)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a menu and its dishes' })
+  @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Menu deleted' })
+  @ApiBadRequestResponse({ description: 'Invalid menu id' })
+  @ApiNotFoundResponse({ description: 'Menu not found' })
+  @ApiConflictResponse({ description: 'Menu used by a restaurant or dish already ordered' })
+  async deleteMenu(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+  ): Promise<void> {
+    await this.menusService.deleteMenu(menu);
+  }
+
+  @Protect({ roles: [USER_ROLES.ADMIN] })
+  @Post(DISHES_ROUTE)
+  @ApiOperation({ summary: 'Add a dish with its option groups to a menu' })
+  @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
+  @ApiCreatedResponse({ type: MenuResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid menu id or body' })
+  @ApiNotFoundResponse({ description: 'Menu not found' })
+  async createDish(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+    @Body() createDishDto: CreateDishDto,
+  ): Promise<MenuResponseDto> {
+    return await this.menusService.createDish(menu, createDishDto);
+  }
+
+  @Protect({ roles: [USER_ROLES.ADMIN] })
+  @Patch(DISH_ID_ROUTE)
+  @ApiOperation({ summary: 'Update a dish, optionGroups replaces every option group' })
+  @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
+  @ApiParam({ name: DISH_ID_PARAM, format: 'uuid' })
+  @ApiOkResponse({ type: MenuResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid ids or body' })
+  @ApiNotFoundResponse({ description: 'Menu or dish not found' })
+  @ApiConflictResponse({ description: 'Options of an already ordered dish cannot be replaced' })
+  async updateDish(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+    @Param(DISH_ID_PARAM, ParseUuidPipe) dishId: UUID,
+    @Body() updateDishDto: UpdateDishDto,
+  ): Promise<MenuResponseDto> {
+    return await this.menusService.updateDish(menu, dishId, updateDishDto);
+  }
+
+  @Protect({ roles: [USER_ROLES.ADMIN] })
+  @Delete(DISH_ID_ROUTE)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove a dish from a menu, already ordered items keep it' })
+  @ApiParam({ name: MENU_ID_PARAM, format: 'uuid' })
+  @ApiParam({ name: DISH_ID_PARAM, format: 'uuid' })
+  @ApiNoContentResponse({ description: 'Dish removed' })
+  @ApiBadRequestResponse({ description: 'Invalid ids' })
+  @ApiNotFoundResponse({ description: 'Menu or dish not found' })
+  async deleteDish(
+    @Param(MENU_ID_PARAM, getEntityByIdPipe('menu')) menu: Selectable<Menu>,
+    @Param(DISH_ID_PARAM, ParseUuidPipe) dishId: UUID,
+  ): Promise<void> {
+    await this.menusService.deleteDish(menu, dishId);
+  }
+}
