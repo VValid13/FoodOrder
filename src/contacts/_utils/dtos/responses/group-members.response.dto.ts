@@ -3,10 +3,9 @@ import { GetUserDto } from '../../../../users/_utils/dtos/responses/get-user.dto
 import { type UUID } from 'crypto';
 
 export class GroupMembersResponseDto {
-  
-  @ApiProperty({type: String})
+  @ApiProperty({ type: String })
   groupId: UUID;
 
-  @ApiProperty({type: [GetUserDto]})
+  @ApiProperty({ type: [GetUserDto] })
   users: GetUserDto[];
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ContactRepository } from './contacts.repository.js';
 import { UUID } from 'crypto';
 import { ContactMapper } from './contacts.mapper.js';
@@ -13,7 +13,7 @@ export class ContactService {
     private readonly contactRepository: ContactRepository,
     private readonly contactMapper: ContactMapper,
     private readonly userService: UsersService,
-    private readonly contactException: ContactsExceptions
+    private readonly contactException: ContactsExceptions,
   ) {}
 
   async getMyGroups(ownerId: UUID): Promise<MyGroupsResponseDto> {

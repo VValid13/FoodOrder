@@ -10,8 +10,8 @@ export class ContactMapper {
   toGroupMemberDto = (groupId: UUID, members: UserEntity[]): GroupMembersResponseDto => {
     return {
       groupId: groupId,
-      users: members.map((e: UserEntity) => ({ id: e.id, username: e.username }))       
-      };
+      users: members.map((e: UserEntity) => ({ id: e.id, username: e.username })),
+    };
   };
 
   toGroupsDto = (entityGroups: ContactEntity[]): MyGroupsResponseDto => {

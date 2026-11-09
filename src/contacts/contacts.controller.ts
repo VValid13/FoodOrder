@@ -56,7 +56,7 @@ export class ContactsController {
   @ApiOperation({ summary: 'Get all members in group' })
   async getUsersInGroupByLabel(
     @GetUserPropertyInPayload() ownerId: UUID,
-    @Param('groupId',ParseEntityIdPipe) groupId: UUID,
+    @Param('groupId', ParseEntityIdPipe) groupId: UUID,
   ): Promise<GroupMembersResponseDto> {
     return await this.contactService.getUsersInGroupById(ownerId, groupId);
   }
@@ -65,13 +65,15 @@ export class ContactsController {
   @Post('/:groupId/members')
   @ApiCreatedResponse()
   @ApiBadRequestResponse({ description: 'Invalid group id or invalid user id in body' })
-  @ApiNotFoundResponse({ description: 'group id not found in owned groups or user id not found in group' })
+  @ApiNotFoundResponse({
+    description: 'group id not found in owned groups or user id not found in group',
+  })
   @ApiConflictResponse({ description: 'user already in group' })
   @ApiParam({ name: 'groupId', format: 'uuid' })
   @ApiOperation({ summary: 'Add members in group by ids' })
   async addUserInGroupById(
     @GetUserPropertyInPayload() ownerId: UUID,
-    @Param('groupId',ParseEntityIdPipe) groupId: UUID,
+    @Param('groupId', ParseEntityIdPipe) groupId: UUID,
     @Body() memberIdDto: MemberRequestDto,
   ): Promise<void> {
     await this.contactService.addUserInGroup(ownerId, groupId, memberIdDto.id);
@@ -88,7 +90,7 @@ export class ContactsController {
   @ApiOperation({ summary: 'Remove member from group' })
   async deleteUsersInList(
     @GetUserPropertyInPayload() ownerId: UUID,
-    @Param('groupId',ParseEntityIdPipe) groupId: UUID,
+    @Param('groupId', ParseEntityIdPipe) groupId: UUID,
     @Param('memberId', ParseEntityIdPipe) memberId: UUID,
   ): Promise<void> {
     await this.contactService.deleteUser(ownerId, groupId, memberId);
