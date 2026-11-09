@@ -4,6 +4,10 @@ import type { Selectable } from 'kysely';
 import type { UUID } from 'node:crypto';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import type { DatabaseTables, Session, SessionStatus } from '../database/database.types.js';
+import type {
+  SessionTransition,
+  SessionTransitionResult,
+} from './_utils/types/session-transition.type.js';
 import type { NewSessionValues, SessionChanges } from './_utils/types/session-values.type.js';
 
 @Injectable()
@@ -38,5 +42,43 @@ export class SessionsRepository {
       .where('id', '=', sessionId)
       .returningAll()
       .executeTakeFirstOrThrow();
+  }
+
+  async updateSessionStatus(
+    sessionId: UUID,
+    { from, to }: SessionTransition,
+    changes: SessionChanges = {},
+  ): Promise<SessionTransitionResult | undefined> {
+    return await this.db.transaction().execute(async (trx) => {
+      const { status } = await trx
+        .selectFrom('session')
+        .select('status')
+        .where('id', '=', sessionId)
+        .forUpdate()
+        .executeTakeFirstOrThrow();
+      if (!from.includes(status)) {
+        return undefined;
+      }
+
+      const session = await trx
+        .updateTable('session')
+        .set({ ...changes, status: to, updatedAt: new Date() })
+        .where('id', '=', sessionId)
+        .returningAll()
+        .executeTakeFirstOrThrow();
+      return { from: status, session };
+    });
+  }
+
+  async hasActiveDish(restaurantId: UUID): Promise<boolean> {
+    const dish = await this.db
+      .selectFrom('dish')
+      .innerJoin('restaurant', 'restaurant.menuId', 'dish.menuId')
+      .select('dish.id')
+      .where('restaurant.id', '=', restaurantId)
+      .where('dish.deletedAt', 'is', null)
+      .limit(1)
+      .executeTakeFirst();
+    return dish !== undefined;
   }
 }
