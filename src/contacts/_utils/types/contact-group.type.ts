@@ -1,7 +1,6 @@
-import { UUID } from "crypto";
-import { Selectable } from "kysely";
-import { UserGroup } from "../../../database/database.types.js";
-
+import { UUID } from 'crypto';
+import { Selectable } from 'kysely';
+import { UserGroup } from '../../../database/database.types.js';
 
 export type ContactGroup = Selectable<UserGroup> & {
   id: UUID;
