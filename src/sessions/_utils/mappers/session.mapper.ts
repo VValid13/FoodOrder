@@ -10,6 +10,10 @@ import {
 } from '../constants/sessions.constants.js';
 import type { CreateSessionDto } from '../dtos/requests/create-session.dto.js';
 import type { SessionResponseDto } from '../dtos/responses/session.response.dto.js';
+import type {
+  SessionStatusChangedEvent,
+  SessionTransition,
+} from '../types/session-transition.type.js';
 import type { NewSessionValues } from '../types/session-values.type.js';
 
 @Injectable()
@@ -45,4 +49,11 @@ export class SessionMapper {
 
   toSessionResponseList = (sessions: Selectable<Session>[]): SessionResponseDto[] =>
     sessions.map((session) => this.toSessionResponse(session));
+
+  toStatusChangedEvent(
+    sessionId: UUID,
+    { from, to }: SessionTransition,
+  ): SessionStatusChangedEvent {
+    return { sessionId, from, to };
+  }
 }

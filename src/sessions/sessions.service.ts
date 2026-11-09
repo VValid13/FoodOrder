@@ -20,10 +20,7 @@ import type { UpdateSessionDto } from './_utils/dtos/requests/update-session.dto
 import type { SessionResponseDto } from './_utils/dtos/responses/session.response.dto.js';
 import { SessionsExceptions } from './_utils/exceptions/sessions.exceptions.js';
 import { SessionMapper } from './_utils/mappers/session.mapper.js';
-import type {
-  SessionStatusChangedEvent,
-  SessionTransition,
-} from './_utils/types/session-transition.type.js';
+import type { SessionTransition } from './_utils/types/session-transition.type.js';
 import type { SessionChanges, SessionSchedule } from './_utils/types/session-values.type.js';
 import { SessionsRepository } from './sessions.repository.js';
 
@@ -147,22 +144,24 @@ export class SessionsService {
     transition: SessionTransition,
     changes?: SessionChanges,
   ): Promise<SessionResponseDto> {
-    const result = await this.sessionsRepository.updateSessionStatus(
+    const session = await this.sessionsRepository.updateSessionStatus(
       sessionId,
       transition,
       changes,
     );
-    if (!result) {
+    if (!session) {
       throw this.sessionsExceptions.invalidTransition;
     }
 
-    const event: SessionStatusChangedEvent = { sessionId, from: result.from, to: transition.to };
-    this.eventEmitter.emit(SESSION_STATUS_CHANGED_EVENT, event);
-    return this.sessionMapper.toSessionResponse(result.session);
+    this.eventEmitter.emit(
+      SESSION_STATUS_CHANGED_EVENT,
+      this.sessionMapper.toStatusChangedEvent(sessionId, transition),
+    );
+    return this.sessionMapper.toSessionResponse(session);
   }
 
   private checkTransition(status: SessionStatus, { from }: SessionTransition): void {
-    if (!from.includes(status)) {
+    if (status !== from) {
       throw this.sessionsExceptions.invalidTransition;
     }
   }

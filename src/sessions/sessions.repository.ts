@@ -4,10 +4,7 @@ import type { Selectable } from 'kysely';
 import type { UUID } from 'node:crypto';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import type { DatabaseTables, Session, SessionStatus } from '../database/database.types.js';
-import type {
-  SessionTransition,
-  SessionTransitionResult,
-} from './_utils/types/session-transition.type.js';
+import type { SessionTransition } from './_utils/types/session-transition.type.js';
 import type { NewSessionValues, SessionChanges } from './_utils/types/session-values.type.js';
 
 @Injectable()
@@ -48,7 +45,7 @@ export class SessionsRepository {
     sessionId: UUID,
     { from, to }: SessionTransition,
     changes: SessionChanges = {},
-  ): Promise<SessionTransitionResult | undefined> {
+  ): Promise<Selectable<Session> | undefined> {
     return await this.db.transaction().execute(async (trx) => {
       const { status } = await trx
         .selectFrom('session')
@@ -56,17 +53,16 @@ export class SessionsRepository {
         .where('id', '=', sessionId)
         .forUpdate()
         .executeTakeFirstOrThrow();
-      if (!from.includes(status)) {
+      if (status !== from) {
         return undefined;
       }
 
-      const session = await trx
+      return await trx
         .updateTable('session')
         .set({ ...changes, status: to, updatedAt: new Date() })
         .where('id', '=', sessionId)
         .returningAll()
         .executeTakeFirstOrThrow();
-      return { from: status, session };
     });
   }
 
