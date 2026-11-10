@@ -122,6 +122,6 @@ export class ContactsController {
     @GetUserPropertyInPayload() userId: UUID,
     @Param('groupId', ParseEntityIdPipe) groupId: UUID,
   ): Promise<void> {
-    await this.contactService.deletGroup(userId, groupId);
+    await this.contactService.deleteGroup(userId, groupId);
   }
 }

@@ -62,7 +62,7 @@ export class ContactService {
     }
   }
 
-  async deletGroup(ownerId: UUID, groupId: UUID): Promise<void> {
+  async deleteGroup(ownerId: UUID, groupId: UUID): Promise<void> {
     if ((await this.contactRepository.deleteGroupById(ownerId, groupId)).numDeletedRows <= 0n) {
       throw this.contactException.groupNotFoundInOwnedGroups(groupId);
     }
