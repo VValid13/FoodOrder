@@ -70,7 +70,7 @@ export class ContactService {
 
   private async isGroupOwnedOrThrow(userId: UUID, groupId: UUID): Promise<void> {
     const myGroups = await this.contactRepository.getAllOwnedGroups(userId);
-    if (myGroups.find((e) => e.id === groupId) === undefined) {
+    if (!myGroups.find((e) => e.id === groupId)) {
       throw this.contactException.groupNotFoundInOwnedGroups(groupId);
     }
   }
