@@ -10,5 +10,6 @@ import { SessionsService } from './sessions.service.js';
   imports: [RestaurantsModule],
   controllers: [SessionsController],
   providers: [SessionsService, SessionsRepository, SessionMapper, SessionsExceptions],
+  exports: [SessionsService],
 })
 export class SessionsModule {}

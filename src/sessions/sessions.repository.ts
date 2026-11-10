@@ -4,6 +4,7 @@ import type { Selectable } from 'kysely';
 import type { UUID } from 'node:crypto';
 import { InjectKysely } from '../_utils/decorators/inject-kysely.decorator.js';
 import type { DatabaseTables, Session, SessionStatus } from '../database/database.types.js';
+import { SESSION_STATUSES } from './_utils/constants/sessions.constants.js';
 import type { SessionTransition } from './_utils/types/session-transition.type.js';
 import type { NewSessionValues, SessionChanges } from './_utils/types/session-values.type.js';
 
@@ -64,6 +65,16 @@ export class SessionsRepository {
         .returningAll()
         .executeTakeFirstOrThrow();
     });
+  }
+
+  async findExpiredSessionIds(): Promise<UUID[]> {
+    const sessions = await this.db
+      .selectFrom('session')
+      .select('id')
+      .where('status', '=', SESSION_STATUSES.OPEN)
+      .where('deadlineAt', '<=', new Date())
+      .execute();
+    return sessions.map(({ id }) => id);
   }
 
   async hasActiveDish(restaurantId: UUID): Promise<boolean> {

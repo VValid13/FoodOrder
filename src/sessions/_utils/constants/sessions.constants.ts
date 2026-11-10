@@ -37,24 +37,22 @@ export const SESSION_ID_PARAM = 'sessionId';
 export const SESSION_ID_ROUTE = `:${SESSION_ID_PARAM}`;
 export const SESSION_OPEN_ROUTE = `${SESSION_ID_ROUTE}/open`;
 export const SESSION_CLOSE_ROUTE = `${SESSION_ID_ROUTE}/close`;
-export const SESSION_REOPEN_ROUTE = `${SESSION_ID_ROUTE}/reopen`;
 export const SESSION_MARK_ORDERED_ROUTE = `${SESSION_ID_ROUTE}/mark-ordered`;
 
 export const SESSIONS_SWAGGER = {
   CREATE: 'Create a draft session on a restaurant',
   FIND_ALL: 'List my sessions (all sessions for an admin), optionally filtered by status',
   FIND_ONE: 'Get one of my sessions (any session for an admin)',
-  UPDATE: 'Update one of my sessions (any session for an admin), refused once it is ordered',
+  UPDATE:
+    'Update one of my sessions (any session for an admin), refused once it is ordered, a new deadline reopens a closed session',
   OPEN: 'Open a draft session, it needs at least one active dish or the free mode',
   CLOSE: 'Close an open session',
-  REOPEN: 'Reopen a closed session, a new deadline is required once the deadline is past',
   MARK_ORDERED: 'Mark a closed session as ordered',
   INVALID_BODY: 'Invalid body',
   INVALID_QUERY: 'Invalid status',
   INVALID_ID_OR_BODY: 'Invalid session id or body',
   INVALID_ID: 'Invalid session id',
   INVALID_SCHEDULE: 'Deadline in the past or pickup before deadline',
-  INVALID_REOPEN: 'Invalid session id or body, deadline required, in the past or before pickup',
   INVALID_OPEN: 'Invalid session id or deadline in the past',
   NOT_OWNER: 'This session belongs to another user and you are not an admin',
   SESSION_NOT_FOUND: 'Session not found',

@@ -15,7 +15,6 @@ import {
 } from './_utils/constants/sessions.constants.js';
 import type { CreateSessionDto } from './_utils/dtos/requests/create-session.dto.js';
 import type { FindSessionsDto } from './_utils/dtos/requests/find-sessions.dto.js';
-import type { ReopenSessionDto } from './_utils/dtos/requests/reopen-session.dto.js';
 import type { UpdateSessionDto } from './_utils/dtos/requests/update-session.dto.js';
 import type { SessionResponseDto } from './_utils/dtos/responses/session.response.dto.js';
 import { SessionsExceptions } from './_utils/exceptions/sessions.exceptions.js';
@@ -83,6 +82,10 @@ export class SessionsService {
       });
     }
 
+    if (session.status === SESSION_STATUSES.CLOSED && deadlineAt) {
+      return await this.applyTransition(session.id, SESSION_TRANSITIONS.REOPEN, updateSessionDto);
+    }
+
     return this.sessionMapper.toSessionResponse(
       await this.sessionsRepository.updateSession(session.id, updateSessionDto),
     );
@@ -105,31 +108,6 @@ export class SessionsService {
     return await this.applyTransition(session.id, SESSION_TRANSITIONS.CLOSE);
   }
 
-  async reopenSession(
-    session: Selectable<Session>,
-    reopenSessionDto: ReopenSessionDto,
-    user: UserEntity,
-  ): Promise<SessionResponseDto> {
-    this.checkOwnerOrAdmin(session, user);
-    this.checkTransition(session.status, SESSION_TRANSITIONS.REOPEN);
-
-    const { deadlineAt, pickupAt } = reopenSessionDto;
-    if (!deadlineAt && !dayjs(session.deadlineAt).isAfter(dayjs())) {
-      throw this.sessionsExceptions.deadlineRequired;
-    }
-    if (deadlineAt) {
-      this.ensureFutureDeadline(deadlineAt);
-    }
-    if (deadlineAt || pickupAt) {
-      await this.ensureValidPickup(session.restaurantId, {
-        deadlineAt: deadlineAt ?? session.deadlineAt,
-        pickupAt: pickupAt ?? session.pickupAt,
-      });
-    }
-
-    return await this.applyTransition(session.id, SESSION_TRANSITIONS.REOPEN, reopenSessionDto);
-  }
-
   async markSessionOrdered(
     session: Selectable<Session>,
     user: UserEntity,
@@ -139,25 +117,44 @@ export class SessionsService {
     return await this.applyTransition(session.id, SESSION_TRANSITIONS.MARK_ORDERED);
   }
 
+  async closeExpiredSessions(): Promise<number> {
+    const sessionIds = await this.sessionsRepository.findExpiredSessionIds();
+    const closedSessions = await Promise.all(
+      sessionIds.map((sessionId) => this.transitionSession(sessionId, SESSION_TRANSITIONS.CLOSE)),
+    );
+    return closedSessions.filter((session) => session !== undefined).length;
+  }
+
   private async applyTransition(
     sessionId: UUID,
     transition: SessionTransition,
     changes?: SessionChanges,
   ): Promise<SessionResponseDto> {
+    const session = await this.transitionSession(sessionId, transition, changes);
+    if (!session) {
+      throw this.sessionsExceptions.invalidTransition;
+    }
+
+    return this.sessionMapper.toSessionResponse(session);
+  }
+
+  private async transitionSession(
+    sessionId: UUID,
+    transition: SessionTransition,
+    changes?: SessionChanges,
+  ): Promise<Selectable<Session> | undefined> {
     const session = await this.sessionsRepository.updateSessionStatus(
       sessionId,
       transition,
       changes,
     );
-    if (!session) {
-      throw this.sessionsExceptions.invalidTransition;
+    if (session) {
+      this.eventEmitter.emit(
+        SESSION_STATUS_CHANGED_EVENT,
+        this.sessionMapper.toStatusChangedEvent(sessionId, transition),
+      );
     }
-
-    this.eventEmitter.emit(
-      SESSION_STATUS_CHANGED_EVENT,
-      this.sessionMapper.toStatusChangedEvent(sessionId, transition),
-    );
-    return this.sessionMapper.toSessionResponse(session);
+    return session;
   }
 
   private checkTransition(status: SessionStatus, { from }: SessionTransition): void {

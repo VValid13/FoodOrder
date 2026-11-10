@@ -33,14 +33,12 @@ import {
   SESSION_ID_ROUTE,
   SESSION_MARK_ORDERED_ROUTE,
   SESSION_OPEN_ROUTE,
-  SESSION_REOPEN_ROUTE,
   SESSIONS_ROUTE,
   SESSIONS_SWAGGER,
   SESSIONS_TAG,
 } from './_utils/constants/sessions.constants.js';
 import { CreateSessionDto } from './_utils/dtos/requests/create-session.dto.js';
 import { FindSessionsDto } from './_utils/dtos/requests/find-sessions.dto.js';
-import { ReopenSessionDto } from './_utils/dtos/requests/reopen-session.dto.js';
 import { UpdateSessionDto } from './_utils/dtos/requests/update-session.dto.js';
 import { SessionResponseDto } from './_utils/dtos/responses/session.response.dto.js';
 import {
@@ -150,25 +148,6 @@ export class SessionsController {
     @Param(SESSION_ID_PARAM, ParseSessionPipe) session: Selectable<Session>,
   ): Promise<SessionResponseDto> {
     return await this.sessionsService.closeSession(session, user);
-  }
-
-  @Protect()
-  @Post(SESSION_REOPEN_ROUTE)
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: SESSIONS_SWAGGER.REOPEN })
-  @ApiParam({ name: SESSION_ID_PARAM, format: 'uuid' })
-  @ApiOkResponse({ type: SessionResponseDto })
-  @ApiBadRequestResponse({ description: SESSIONS_SWAGGER.INVALID_REOPEN })
-  @ApiForbiddenResponse({ description: SESSIONS_SWAGGER.NOT_OWNER })
-  @ApiNotFoundResponse({ description: SESSIONS_SWAGGER.SESSION_NOT_FOUND })
-  @ApiConflictResponse({ description: INVALID_TRANSITION_MESSAGE })
-  @ApiUnprocessableEntityResponse({ description: RESTAURANT_CLOSED_MESSAGE })
-  async reopenSession(
-    @ConnectedUser() user: UserEntity,
-    @Param(SESSION_ID_PARAM, ParseSessionPipe) session: Selectable<Session>,
-    @Body() reopenSessionDto: ReopenSessionDto,
-  ): Promise<SessionResponseDto> {
-    return await this.sessionsService.reopenSession(session, reopenSessionDto, user);
   }
 
   @Protect()
