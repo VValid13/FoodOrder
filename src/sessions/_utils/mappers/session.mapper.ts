@@ -40,6 +40,7 @@ export class SessionMapper {
       fees: session.fees,
       discount: session.discount,
       freeMode: session.freeMode,
+      publicLinkEnabled: session.publicLinkEnabled,
       shareToken: session.shareToken,
       expiresAt: session.expiresAt,
       createdAt: session.createdAt,

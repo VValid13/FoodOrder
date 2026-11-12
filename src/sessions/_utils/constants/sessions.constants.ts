@@ -38,6 +38,7 @@ export const SESSION_ID_ROUTE = `:${SESSION_ID_PARAM}`;
 export const SESSION_OPEN_ROUTE = `${SESSION_ID_ROUTE}/open`;
 export const SESSION_CLOSE_ROUTE = `${SESSION_ID_ROUTE}/close`;
 export const SESSION_MARK_ORDERED_ROUTE = `${SESSION_ID_ROUTE}/mark-ordered`;
+export const SESSION_PUBLIC_LINK_ROUTE = `${SESSION_ID_ROUTE}/public-link`;
 
 export const SESSIONS_SWAGGER = {
   CREATE: 'Create a draft session on a restaurant',
@@ -48,6 +49,7 @@ export const SESSIONS_SWAGGER = {
   OPEN: 'Open a draft session, it needs at least one active dish or the free mode',
   CLOSE: 'Close an open session',
   MARK_ORDERED: 'Mark a closed session as ordered',
+  UPDATE_PUBLIC_LINK: 'Enable or disable the public link of a session',
   INVALID_BODY: 'Invalid body',
   INVALID_QUERY: 'Invalid status',
   INVALID_ID_OR_BODY: 'Invalid session id or body',

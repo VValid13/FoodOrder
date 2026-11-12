@@ -12,6 +12,7 @@ import { RestaurantsModule } from './restaurants/restaurants.module.js';
 import { ContactsModule } from './contacts/contacts.module.js';
 import { SessionsModule } from './sessions/sessions.module.js';
 import { CronsModule } from './crons/crons.module.js';
+import { InvitationsModule } from './invitations/invitations.module.js';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CronsModule } from './crons/crons.module.js';
     MenusModule,
     SessionsModule,
     CronsModule,
+    InvitationsModule,
   ],
 })
 export class AppModule {}

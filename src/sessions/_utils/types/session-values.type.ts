@@ -16,6 +16,9 @@ export type NewSessionValues = Pick<
   EditableSessionColumns | 'restaurantId' | 'creatorId' | 'shareToken' | 'expiresAt'
 >;
 
-export type SessionChanges = Pick<Updateable<Session>, EditableSessionColumns>;
+export type SessionChanges = Pick<
+  Updateable<Session>,
+  EditableSessionColumns | 'publicLinkEnabled'
+>;
 
 export type SessionSchedule = Pick<Selectable<Session>, 'deadlineAt' | 'pickupAt'>;

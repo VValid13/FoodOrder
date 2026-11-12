@@ -15,6 +15,7 @@ import {
 } from './_utils/constants/sessions.constants.js';
 import type { CreateSessionDto } from './_utils/dtos/requests/create-session.dto.js';
 import type { FindSessionsDto } from './_utils/dtos/requests/find-sessions.dto.js';
+import type { UpdatePublicLinkDto } from './_utils/dtos/requests/update-public-link.dto.js';
 import type { UpdateSessionDto } from './_utils/dtos/requests/update-session.dto.js';
 import type { SessionResponseDto } from './_utils/dtos/responses/session.response.dto.js';
 import { SessionsExceptions } from './_utils/exceptions/sessions.exceptions.js';
@@ -91,6 +92,17 @@ export class SessionsService {
     );
   }
 
+  async updatePublicLink(
+    session: Selectable<Session>,
+    updatePublicLinkDto: UpdatePublicLinkDto,
+    user: UserEntity,
+  ): Promise<SessionResponseDto> {
+    this.checkOwnerOrAdmin(session, user);
+    return this.sessionMapper.toSessionResponse(
+      await this.sessionsRepository.updateSession(session.id, updatePublicLinkDto),
+    );
+  }
+
   async openSession(session: Selectable<Session>, user: UserEntity): Promise<SessionResponseDto> {
     this.checkOwnerOrAdmin(session, user);
     this.checkTransition(session.status, SESSION_TRANSITIONS.OPEN);
@@ -123,6 +135,12 @@ export class SessionsService {
       sessionIds.map((sessionId) => this.transitionSession(sessionId, SESSION_TRANSITIONS.CLOSE)),
     );
     return closedSessions.filter((session) => session !== undefined).length;
+  }
+
+  checkOwnerOrAdmin(session: Selectable<Session>, user: UserEntity): void {
+    if (session.creatorId !== user.id && user.role !== USER_ROLES.ADMIN) {
+      throw this.sessionsExceptions.accessForbidden;
+    }
   }
 
   private async applyTransition(
@@ -160,12 +178,6 @@ export class SessionsService {
   private checkTransition(status: SessionStatus, { from }: SessionTransition): void {
     if (status !== from) {
       throw this.sessionsExceptions.invalidTransition;
-    }
-  }
-
-  private checkOwnerOrAdmin(session: Selectable<Session>, user: UserEntity): void {
-    if (session.creatorId !== user.id && user.role !== USER_ROLES.ADMIN) {
-      throw this.sessionsExceptions.accessForbidden;
     }
   }
 

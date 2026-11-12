@@ -83,7 +83,7 @@ export class RestaurantsController {
   async findRestaurant(
     @Param(RESTAURANT_ID_PARAM, getEntityByIdPipe('restaurant')) restaurant: Selectable<Restaurant>,
   ): Promise<RestaurantWithMenuResponseDto> {
-    return await this.restaurantsService.findRestaurant(restaurant);
+    return await this.restaurantsService.findRestaurant(restaurant.id);
   }
 
   @Protect({ roles: [USER_ROLES.ADMIN] })

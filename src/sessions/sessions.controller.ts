@@ -33,12 +33,14 @@ import {
   SESSION_ID_ROUTE,
   SESSION_MARK_ORDERED_ROUTE,
   SESSION_OPEN_ROUTE,
+  SESSION_PUBLIC_LINK_ROUTE,
   SESSIONS_ROUTE,
   SESSIONS_SWAGGER,
   SESSIONS_TAG,
 } from './_utils/constants/sessions.constants.js';
 import { CreateSessionDto } from './_utils/dtos/requests/create-session.dto.js';
 import { FindSessionsDto } from './_utils/dtos/requests/find-sessions.dto.js';
+import { UpdatePublicLinkDto } from './_utils/dtos/requests/update-public-link.dto.js';
 import { UpdateSessionDto } from './_utils/dtos/requests/update-session.dto.js';
 import { SessionResponseDto } from './_utils/dtos/responses/session.response.dto.js';
 import {
@@ -113,6 +115,22 @@ export class SessionsController {
     @Body() updateSessionDto: UpdateSessionDto,
   ): Promise<SessionResponseDto> {
     return await this.sessionsService.updateSession(session, updateSessionDto, user);
+  }
+
+  @Protect()
+  @Patch(SESSION_PUBLIC_LINK_ROUTE)
+  @ApiOperation({ summary: SESSIONS_SWAGGER.UPDATE_PUBLIC_LINK })
+  @ApiParam({ name: SESSION_ID_PARAM, format: 'uuid' })
+  @ApiOkResponse({ type: SessionResponseDto })
+  @ApiBadRequestResponse({ description: SESSIONS_SWAGGER.INVALID_ID_OR_BODY })
+  @ApiForbiddenResponse({ description: SESSIONS_SWAGGER.NOT_OWNER })
+  @ApiNotFoundResponse({ description: SESSIONS_SWAGGER.SESSION_NOT_FOUND })
+  async updatePublicLink(
+    @ConnectedUser() user: UserEntity,
+    @Param(SESSION_ID_PARAM, ParseSessionPipe) session: Selectable<Session>,
+    @Body() updatePublicLinkDto: UpdatePublicLinkDto,
+  ): Promise<SessionResponseDto> {
+    return await this.sessionsService.updatePublicLink(session, updatePublicLinkDto, user);
   }
 
   @Protect()

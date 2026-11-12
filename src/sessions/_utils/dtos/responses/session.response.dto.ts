@@ -37,6 +37,9 @@ export class SessionResponseDto {
   @ApiProperty()
   freeMode: boolean;
 
+  @ApiProperty()
+  publicLinkEnabled: boolean;
+
   @ApiProperty({ example: 'Kzh-FKI40WbU', description: 'Secret token of the share link' })
   shareToken: string;
 
