@@ -10,11 +10,9 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type InvitationStatus = "accepted" | "declined" | "pending" | "revoked";
-
-export type MemberStatus = "active" | "left";
-
 export type OrderStatus = "cancelled" | "in_progress" | "modified" | "validated";
+
+export type ParticipantStatus = "cancelled" | "in_progress" | "invited" | "modified" | "seen" | "validated";
 
 export type PaymentMethod = "card" | "cash" | "other" | "transfer";
 
@@ -59,17 +57,6 @@ export interface Favorite {
   createdAt: Generated<Timestamp>;
   customerOrderId: UUID;
   userId: UUID;
-}
-
-export interface Invitation {
-  createdAt: Generated<Timestamp>;
-  expiresAt: Timestamp | null;
-  id: Generated<UUID>;
-  recipientId: UUID | null;
-  sessionId: UUID;
-  status: Generated<InvitationStatus>;
-  tokenHash: string;
-  updatedAt: Generated<Timestamp>;
 }
 
 export interface Menu {
@@ -169,6 +156,7 @@ export interface Session {
   payerName: string | null;
   paymentMode: Generated<PaymentMode>;
   pickupAt: Timestamp;
+  publicLinkEnabled: Generated<boolean>;
   restaurantId: UUID;
   shareToken: string;
   status: Generated<SessionStatus>;
@@ -178,10 +166,12 @@ export interface Session {
 export interface SessionMember {
   createdAt: Generated<Timestamp>;
   id: Generated<UUID>;
+  name: string;
   sessionId: UUID;
-  status: Generated<MemberStatus>;
+  status: Generated<ParticipantStatus>;
+  tokenHash: string | null;
   updatedAt: Generated<Timestamp>;
-  userId: UUID;
+  userId: UUID | null;
 }
 
 export interface Token {
@@ -221,7 +211,6 @@ export interface DatabaseTables {
   dish: Dish;
   document: Document;
   favorite: Favorite;
-  invitation: Invitation;
   menu: Menu;
   openingSlot: OpeningSlot;
   option: Option;

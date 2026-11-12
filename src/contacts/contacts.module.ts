@@ -10,5 +10,6 @@ import { ContactsExceptions } from './_utils/exceptions/contacts.exceptions.js';
   imports: [UsersModule],
   providers: [ContactService, ContactRepository, ContactMapper, ContactsExceptions],
   controllers: [ContactsController],
+  exports: [ContactService],
 })
 export class ContactsModule {}

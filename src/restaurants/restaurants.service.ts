@@ -47,11 +47,12 @@ export class RestaurantsService {
     );
   }
 
-  async findRestaurant(restaurant: Selectable<Restaurant>): Promise<RestaurantWithMenuResponseDto> {
-    const restaurantDetails = await this.restaurantsRepository.findRestaurantByIdOrFail(
-      restaurant.id,
-    );
-    const menu = restaurant.menuId ? await this.menusService.findMenuById(restaurant.menuId) : null;
+  async findRestaurant(restaurantId: UUID): Promise<RestaurantWithMenuResponseDto> {
+    const restaurantDetails =
+      await this.restaurantsRepository.findRestaurantByIdOrFail(restaurantId);
+    const menu = restaurantDetails.menuId
+      ? await this.menusService.findMenuById(restaurantDetails.menuId)
+      : null;
     return this.restaurantMapper.toResponseWithMenu(restaurantDetails, menu);
   }
 
